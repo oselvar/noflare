@@ -40,7 +40,7 @@ Just write your services as normal with the following changes:
 ## Adapters
 
 Noflare requires your application to decouple the business logic from the Cloudflare Workers runtime
-by using *adapters*.
+by using _adapters_.
 
 For example, if your application needs to store PDFs in a KV store, your business logic will access
 a `PDFStore` adapter, not the `this.env.PDF_STORE` object.
@@ -58,4 +58,3 @@ You will have two implementations of the `PDFStore` interface:
 
 1. A production implementation that uses a `KVNamespace` instance
 2. A stub implementation (used for testing) that uses a `Map` instance
-

@@ -22,6 +22,7 @@
     "test": "vitest --coverage",
     "start": "wrangler dev --port 9875",
     "fix": "tsc && prettier --write . && eslint --fix .",
+    "build": "tsup",
     "upgrade": "npm-check-updates --upgrade --deep"
   },
   "devDependencies": {
