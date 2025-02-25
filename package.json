@@ -1,0 +1,48 @@
+{
+  "name": "@oselvar/noflare",
+  "version": "1.0.0",
+  "description": "Test helpers for Cloudflare Workers",
+  "keywords": [
+    "cloudflare",
+    "testing"
+  ],
+  "homepage": "https://github.com/oselvar/noflare#readme",
+  "bugs": {
+    "url": "https://github.com/oselvar/noflare/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/oselvar/noflare.git"
+  },
+  "license": "MIT",
+  "author": "Aslak Hellesøy",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest --coverage",
+    "start": "wrangler dev --port 9875",
+    "fix": "tsc && prettier --write . && eslint --fix .",
+    "upgrade": "npm-check-updates --upgrade --deep"
+  },
+  "devDependencies": {
+    "@eslint/compat": "1.2.7",
+    "@eslint/js": "9.21.0",
+    "@types/eslint-config-prettier": "^6.11.3",
+    "@types/node": "^22.13.5",
+    "@vitest/coverage-v8": "3.0.7",
+    "eslint": "9.21.0",
+    "eslint-config-prettier": "10.0.1",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-simple-import-sort": "12.1.1",
+    "globals": "16.0.0",
+    "prettier": "3.5.2",
+    "tsup": "8.3.6",
+    "typescript": "5.7.3",
+    "typescript-eslint": "8.25.0",
+    "vitest": "3.0.7",
+    "wrangler": "3.109.3"
+  },
+  "peerDependencies": {
+    "@cloudflare/workers-types": "^4.20250224.0"
+  }
+}
