@@ -49,6 +49,7 @@
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-simple-import-sort": "12.1.1",
     "globals": "16.0.0",
+    "np": "10.2.0",
     "npm-check-updates": "17.1.15",
     "prettier": "3.5.2",
     "tsup": "8.3.6",
