@@ -1,4 +1,4 @@
-import { createCloudflareWorkflow } from "../createCloudflareWorkflow";
+import { createCloudflareWorkflow } from "../cloudflare/createCloudflareWorkflow";
 import { KVNumberStore } from "./adapters/KVNumberStore";
 import {
   CalculateCubeAdapters,

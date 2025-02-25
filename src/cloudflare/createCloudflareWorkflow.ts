@@ -4,7 +4,7 @@ import {
   WorkflowEntrypoint as NoflareWorkflowEntrypoint,
   type WorkflowEvent,
   type WorkflowStep,
-} from "./workflows";
+} from "../workflows";
 
 export function createCloudflareWorkflow<
   Env,
