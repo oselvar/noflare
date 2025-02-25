@@ -1,6 +1,6 @@
 {
   "name": "@oselvar/noflare",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Test helpers for Cloudflare Workers",
   "keywords": [
     "cloudflare",
@@ -17,12 +17,18 @@
   "license": "MIT",
   "author": "Aslak Hellesøy",
   "type": "module",
-  "main": "index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "test": "vitest --coverage",
     "start": "wrangler dev --port 9875",
     "fix": "tsc && prettier --write . && eslint --fix .",
     "build": "tsup",
+    "prepublishOnly": "npm run build",
     "upgrade": "npm-check-updates --upgrade --deep"
   },
   "devDependencies": {
