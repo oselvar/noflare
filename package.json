@@ -1,6 +1,6 @@
 {
   "name": "@oselvar/noflare",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Test helpers for Cloudflare Workers",
   "keywords": [
     "cloudflare",
@@ -51,6 +51,6 @@
     "wrangler": "3.109.3"
   },
   "peerDependencies": {
-    "@cloudflare/workers-types": "^4.20250224.0"
+    "@cloudflare/workers-types": "*"
   }
 }
