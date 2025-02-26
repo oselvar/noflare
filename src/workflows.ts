@@ -18,7 +18,7 @@ export type WorkflowEvent<T> = {
   instanceId: string;
 };
 
-type WorkflowStepConfig = {
+export type WorkflowStepConfig = {
   retries?: {
     limit: number;
     delay: WorkflowDelayDuration | number;
@@ -43,7 +43,7 @@ type WorkflowSleepDuration =
 type WorkflowDelayDuration = WorkflowSleepDuration;
 type WorkflowTimeoutDuration = WorkflowSleepDuration;
 
-type Task<T> = () => Promise<T>;
+export type Task<T> = () => Promise<T>;
 
 export class ImmediateStep implements WorkflowStep {
   do<T>(
