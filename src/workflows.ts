@@ -1,7 +1,3 @@
-import { debug } from "debug";
-
-const log = debug("@oselvar/noflare");
-
 export abstract class WorkflowEntrypoint<Adapters, T = unknown> {
   constructor(protected readonly adapters: Adapters) {}
   abstract run(event: WorkflowEvent<T>, step: WorkflowStep): Promise<unknown>;
@@ -55,7 +51,9 @@ export class ImmediateStep implements WorkflowStep {
     configOrTask: WorkflowStepConfig | Task<T>,
     task?: Task<T>,
   ): Promise<T> {
-    log("do", label);
+    if (!label) {
+      throw new Error("Label is required");
+    }
     if (typeof configOrTask === "function") {
       return configOrTask();
     }
