@@ -5,6 +5,25 @@ that makes it easier to test Cloudflare Worker applications.
 
 Noflare does not use a local wrangler session and does not depend on the Cloudflare runtime.
 
+## Motivation
+
+Cloudflare Workflows embody critical business logic that is important to test.
+However, Workflows are difficult to test outside of the Cloudflare/Wrangler runtime.
+
+It is definitely *possible* to test workflows using Wrangler, but not without significant
+effort.
+
+Workflows typically communicate with external services, and mocking those is non-trivial
+when the tests run in one process and the workflow in another.
+
+We wanted a way to test Workflows where the tests and the workflow run in the same process.
+This makes it easier to stub external services and verify how the workflow interacts with them.
+
+Another reason we wanted to run them in the same process is that we want a sub-second
+feedback cycle.
+
+Noflare achieves this by providing a mechanism to inject stub adapters for external services.
+
 ## Workflows
 
 Just write your workflows as normal with the following changes:
