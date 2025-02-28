@@ -1,6 +1,14 @@
 export abstract class WorkflowEntrypoint<Adapters, T = unknown> {
-  constructor(protected readonly adapters: Adapters) {}
+  constructor(
+    protected readonly adapters: Adapters,
+    protected readonly NonRetryableError: NonRetryableErrorConstructor = Error,
+  ) {}
   abstract run(event: WorkflowEvent<T>, step: WorkflowStep): Promise<unknown>;
+}
+
+export interface NonRetryableErrorConstructor {
+  new (message: string, name?: string): Error;
+  readonly prototype: Error;
 }
 
 export interface WorkflowStep {

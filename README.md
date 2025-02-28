@@ -10,7 +10,7 @@ Noflare does not use a local wrangler session and does not depend on the Cloudfl
 Cloudflare Workflows embody critical business logic that is important to test.
 However, Workflows are difficult to test outside of the Cloudflare/Wrangler runtime.
 
-It is definitely *possible* to test workflows using Wrangler, but not without significant
+It is definitely _possible_ to test workflows using Wrangler, but not without significant
 effort.
 
 Workflows typically communicate with external services, and mocking those is non-trivial

@@ -29,4 +29,27 @@ describe("CalculateCubeWorkflow", () => {
     const actual = await numberStore.getNumber("test");
     expect(expected).toBe(actual);
   });
+
+  it("should throw a non-retryable error for a negative number", async () => {
+    const step = new ImmediateStep();
+
+    const numberStore = new MemoryNumberStore();
+    const adapters: CalculateCubeAdapters = {
+      numberStore,
+    };
+
+    const workflow = new CalculateCubeWorkflow(adapters);
+    await expect(
+      workflow.run(
+        {
+          instanceId: "test",
+          timestamp: new Date(),
+          payload: { value: -1 },
+        },
+        step,
+      ),
+    ).rejects.toThrow(
+      "Value cannot be negative - this is a non-retryable error",
+    );
+  });
 });

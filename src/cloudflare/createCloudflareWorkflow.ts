@@ -1,6 +1,8 @@
 import { WorkflowEntrypoint as CloudflareWorkflowEntrypoint } from "cloudflare:workers";
+import { NonRetryableError } from "cloudflare:workflows";
 
 import {
+  type NonRetryableErrorConstructor,
   WorkflowEntrypoint as NoflareWorkflowEntrypoint,
   type WorkflowEvent,
   type WorkflowStep,
@@ -13,6 +15,7 @@ export function createCloudflareWorkflow<
 >(
   WorkflowImpl: new (
     adapters: Adapters,
+    NonRetryableError: NonRetryableErrorConstructor,
   ) => NoflareWorkflowEntrypoint<Adapters, T>,
   makeAdapters: (env: Env) => Adapters,
 ) {
@@ -28,7 +31,7 @@ export function createCloudflareWorkflow<
 
     async run(event: WorkflowEvent<T>, step: WorkflowStep) {
       const adapters = makeAdapters(this.env);
-      const workflow = new WorkflowImpl(adapters);
+      const workflow = new WorkflowImpl(adapters, NonRetryableError);
       await workflow.run(event, step);
     }
   };

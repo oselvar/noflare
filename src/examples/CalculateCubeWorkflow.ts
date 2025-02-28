@@ -26,9 +26,28 @@ export class CalculateCubeWorkflow extends WorkflowEntrypoint<
   async run(event: WorkflowEvent<CalculateCubeParams>, step: WorkflowStep) {
     const params = event.payload;
 
-    const square = await step.do("calculate square", async () => {
-      return params.value * params.value;
-    });
+    const square = await step.do(
+      "calculate square",
+      {
+        retries: {
+          limit: 3,
+          delay: "1 second",
+        },
+      },
+      async () => {
+        console.log("calculate square", params.value);
+        if (params.value === 0) {
+          throw new Error("Value cannot be 0 - this is a retryable error");
+        }
+        if (params.value < 0) {
+          throw new this.NonRetryableError(
+            "Value cannot be negative - this is a non-retryable error",
+            "the-name",
+          );
+        }
+        return params.value * params.value;
+      },
+    );
 
     const cube = await step.do("calculate cube", async () => {
       return square * params.value;

@@ -31,7 +31,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "vitest --coverage",
+    "test": "vitest",
     "start": "wrangler dev --port 9875",
     "fix": "tsc && prettier --write . && eslint --fix .",
     "build": "tsup",
