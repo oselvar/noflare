@@ -6,6 +6,6 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   format: "esm",
-  external: ["cloudflare:workers"],
+  external: ["cloudflare:workers", "cloudflare:workflows"],
   dts: true,
 });
