@@ -7,11 +7,15 @@ Noflare does not use a local wrangler session and does not depend on the Cloudfl
 
 ## Motivation
 
-Cloudflare Workflows embody critical business logic that is important to test.
-However, Workflows are difficult to test outside of the Cloudflare/Wrangler runtime.
+The library was created to make Cloudflare Workflows easier to test.
 
-It is definitely _possible_ to test workflows using Wrangler, but not without significant
-effort.
+## Workflows
+
+Cloudflare Workflows embody critical business logic that is important to test.
+
+It's _particularly_ important to test that all the steps are [idempotent](https://developers.cloudflare.com/workflows/build/rules-of-workflows/#ensure-apibinding-calls-are-idempotent).
+
+It's also important to test that workflows can run concurrently.
 
 Workflows typically communicate with external services, and mocking those is non-trivial
 when the tests run in one process and the workflow in another.
@@ -23,8 +27,6 @@ Another reason we wanted to run them in the same process is that we want a sub-s
 feedback cycle.
 
 Noflare achieves this by providing a mechanism to inject stub adapters for external services.
-
-## Workflows
 
 Just write your workflows as normal with the following changes:
 
@@ -48,6 +50,16 @@ Try it out interactively
 Now, let's test it:
 
     npx vitest
+
+### Tips
+
+Noflare might highlight idempotency bugs in your workflows.
+Here are some tips to help make them idempotent:
+
+* Avoid nested if statements and loops around workflow steps.
+* Visualize your workflows with `@oselvar/c4`. (Coming soon).
+* If you use D1 (Sqlite), `UNIQUE` constraints might help you avoid inserting duplicate data.
+
 
 ## Services
 

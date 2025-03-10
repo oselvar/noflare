@@ -53,8 +53,12 @@ type WorkflowTimeoutDuration = WorkflowSleepDuration;
 
 export type Task<T> = () => Promise<T>;
 
-export class ImmediateStep implements WorkflowStep {
-  do<T>(
+/**
+ * A step that runs the task twice to verify idempotency.
+ * This helps identify steps that are not idempotent so they can be fixed.
+ */
+class RunTwiceStep implements WorkflowStep {
+  async do<T>(
     label: string,
     configOrTask: WorkflowStepConfig | Task<T>,
     task?: Task<T>,
@@ -62,13 +66,26 @@ export class ImmediateStep implements WorkflowStep {
     if (!label) {
       throw new Error("Label is required");
     }
+    let _task: Task<T> | undefined;
     if (typeof configOrTask === "function") {
-      return configOrTask();
+      _task = configOrTask;
     }
     if (typeof task === "function") {
-      return task();
+      _task = task;
     }
-
-    throw new Error("No task provided");
+    if (!_task) {
+      throw new Error("No task provided");
+    }
+    // Run the task twice to verify idempotency
+    await _task();
+    return _task();
   }
+}
+
+export function runWorkflow<Adapters, T = unknown>(
+  workflow: WorkflowEntrypoint<Adapters, T>,
+  event: WorkflowEvent<T>,
+) {
+  const step = new RunTwiceStep();
+  return workflow.run(event, step);
 }
