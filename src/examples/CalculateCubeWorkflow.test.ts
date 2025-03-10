@@ -37,9 +37,35 @@ describe("CalculateCubeWorkflow", () => {
         instanceId: "test",
         timestamp: new Date(),
         payload: { value: -1 },
-      })
+      }),
     ).rejects.toThrow(
-      "Value cannot be negative - this is a non-retryable error"
+      "Value cannot be negative - this is a non-retryable error",
     );
+  });
+
+  it("should run multiple workflows concurrently", async () => {
+    const numberStore = new MemoryNumberStore();
+    const adapters: CalculateCubeAdapters = {
+      numberStore,
+    };
+
+    const workflow = new CalculateCubeWorkflow(adapters);
+
+    const values = [1, 2, 3, 4];
+    const workflows = values.map((value) => {
+      return runWorkflow(workflow, {
+        instanceId: `test-${value}`,
+        timestamp: new Date(),
+        payload: { value },
+      });
+    });
+
+    await Promise.all(workflows);
+
+    const expected = values.map((value) => value * value * value);
+    const actual = await Promise.all(
+      values.map((value) => numberStore.getNumber(`test-${value}`)),
+    );
+    expect(expected).toEqual(actual);
   });
 });

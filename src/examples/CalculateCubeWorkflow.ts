@@ -35,7 +35,6 @@ export class CalculateCubeWorkflow extends WorkflowEntrypoint<
         },
       },
       async () => {
-        console.log("calculate square", params.value);
         if (params.value === 0) {
           throw new Error("Value cannot be 0 - this is a retryable error");
         }

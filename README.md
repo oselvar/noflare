@@ -56,10 +56,9 @@ Now, let's test it:
 Noflare might highlight idempotency bugs in your workflows.
 Here are some tips to help make them idempotent:
 
-* Avoid nested if statements and loops around workflow steps.
-* Visualize your workflows with `@oselvar/c4`. (Coming soon).
-* If you use D1 (Sqlite), `UNIQUE` constraints might help you avoid inserting duplicate data.
-
+- Avoid nested if statements and loops around workflow steps.
+- Visualize your workflows with `@oselvar/c4`. (Coming soon).
+- If you use D1 (Sqlite), `UNIQUE` constraints might help you avoid inserting duplicate data.
 
 ## Services
 
