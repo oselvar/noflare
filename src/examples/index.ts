@@ -11,7 +11,7 @@ const CalculateCubeWorkflow = createCloudflareWorkflow<
   Env,
   CalculateCubeParams,
   CalculateCubeAdapters
->(CalculateCube, (env) => ({
+>(CalculateCube, (_ctx, env) => ({
   numberStore: new KVNumberStore(env.NUMBER_STORE),
 }));
 

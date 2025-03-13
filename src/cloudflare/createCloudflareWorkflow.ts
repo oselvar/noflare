@@ -17,7 +17,7 @@ export function createCloudflareWorkflow<
     adapters: Adapters,
     NonRetryableError: NonRetryableErrorConstructor,
   ) => NoflareWorkflowEntrypoint<Adapters, T>,
-  makeAdapters: (env: Env) => Adapters,
+  makeAdapters: (ctx: ExecutionContext, env: Env) => Adapters,
 ) {
   return class extends CloudflareWorkflowEntrypoint<Env, T> {
     // Redeclaring the constructor to make ctx and env publi to work around tsup dts generation error:
@@ -30,7 +30,7 @@ export function createCloudflareWorkflow<
     }
 
     async run(event: WorkflowEvent<T>, step: WorkflowStep) {
-      const adapters = makeAdapters(this.env);
+      const adapters = makeAdapters(this.ctx, this.env);
       const workflow = new WorkflowImpl(adapters, NonRetryableError);
       await workflow.run(event, step);
     }
