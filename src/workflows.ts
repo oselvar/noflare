@@ -1,7 +1,7 @@
 export abstract class WorkflowEntrypoint<Adapters, T = unknown> {
   constructor(
     protected readonly adapters: Adapters,
-    protected readonly NonRetryableError: NonRetryableErrorConstructor = Error
+    protected readonly NonRetryableError: NonRetryableErrorConstructor = Error,
   ) {}
   abstract run(event: WorkflowEvent<T>, step: WorkflowStep): Promise<unknown>;
 }
@@ -15,7 +15,7 @@ export interface WorkflowStep {
   do<T>(
     label: string,
     config: WorkflowStepConfig,
-    task: () => Promise<T>
+    task: () => Promise<T>,
   ): Promise<T>;
   do<T>(label: string, task: () => Promise<T>): Promise<T>;
 }
@@ -64,7 +64,7 @@ export class NoflareStep implements WorkflowStep {
   async do<T>(
     label: string,
     configOrTask: WorkflowStepConfig | Task<T>,
-    task?: Task<T>
+    task?: Task<T>,
   ): Promise<T> {
     if (!label) {
       throw new Error("Label is required");
@@ -88,8 +88,8 @@ export class NoflareStep implements WorkflowStep {
 
 export function runWorkflow<Adapters, T = unknown>(
   workflow: WorkflowEntrypoint<Adapters, T>,
-  event: WorkflowEvent<T>
+  event: WorkflowEvent<T>,
+  step = new NoflareStep(),
 ) {
-  const step = new NoflareStep();
   return workflow.run(event, step);
 }
