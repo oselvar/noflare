@@ -18,9 +18,11 @@ export function createCloudflareWorkflow<
     NonRetryableError: NonRetryableErrorConstructor,
   ) => NoflareWorkflowEntrypoint<Adapters, T>,
   makeAdapters: (ctx: ExecutionContext, env: Env) => Adapters,
+  wrapStep: (step: WorkflowStep, adapters: Adapters) => WorkflowStep = (step) =>
+    step,
 ) {
   return class extends CloudflareWorkflowEntrypoint<Env, T> {
-    // Redeclaring the constructor to make ctx and env publi to work around tsup dts generation error:
+    // Redeclaring the constructor to make ctx and env public to work around tsup dts generation error:
     //   error TS4094: Property 'ctx' of exported anonymous class type may not be private or protected.
     constructor(
       public readonly ctx: ExecutionContext,
@@ -32,7 +34,7 @@ export function createCloudflareWorkflow<
     async run(event: WorkflowEvent<T>, step: WorkflowStep) {
       const adapters = makeAdapters(this.ctx, this.env);
       const workflow = new WorkflowImpl(adapters, NonRetryableError);
-      await workflow.run(event, step);
+      await workflow.run(event, wrapStep(step, adapters));
     }
   };
 }
