@@ -12,11 +12,7 @@ export type CalculateCubeParams = {
 
 export type CalculateCubeAdapters = {
   numberStore: NumberStore;
-  workflow: Workflow<
-    CalculateCubeEntrypoint,
-    CalculateCubeAdapters,
-    CalculateCubeParams
-  >;
+  workflow: Workflow<CalculateCubeAdapters, CalculateCubeParams>;
 };
 
 export class CalculateCubeEntrypoint extends WorkflowEntrypoint<

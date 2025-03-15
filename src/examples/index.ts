@@ -15,7 +15,6 @@ const CalculateCubeWorkflow = createCloudflareWorkflow<
 >(CalculateCubeEntrypoint, (_ctx, env) => ({
   numberStore: new KVNumberStore(env.NUMBER_STORE),
   workflow: env.CALCULATE_CUBE_WORKFLOW as unknown as NoflareWorkflow<
-    CalculateCubeEntrypoint,
     CalculateCubeAdapters,
     CalculateCubeParams
   >,

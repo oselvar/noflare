@@ -1,43 +1,52 @@
-import { WorkflowEntrypoint } from "../workflows";
-import { WorkflowStep } from "../workflows";
-import { WorkflowEvent } from "../workflows";
 import { PauseControl } from "./PauseControl";
+import { TerminatableStep } from "./TerminatableStep";
 
-export type WorkflowInstanceCreateOptions<Params> = Readonly<{
-  id: string;
-  params: Params;
-}>;
+type InstanceStatus = {
+  status: "running" | "paused" | "completed" | "errored" | "terminated";
+  error?: string;
+};
 
-export class WorkflowInstance<
-  Entrypoint extends WorkflowEntrypoint<Adapters, Params>,
-  Adapters,
-  Params,
-> {
+export class WorkflowInstance {
+  private instanceStatus: InstanceStatus = { status: "running" };
+
   constructor(
-    private readonly pauseControl: PauseControl,
-    private readonly entrypoint: Entrypoint,
-    private readonly options: WorkflowInstanceCreateOptions<Params>,
-    private readonly step: WorkflowStep
+    public readonly id: string,
+    private readonly stepPauseControl: PauseControl,
+    private readonly finishedPauseControl: PauseControl,
+    private readonly terminatableStep: TerminatableStep,
   ) {}
 
-  /**
-   * Starts this instance
-   * @returns a Promise that resolves when the workflow has completed.
-   */
-  start() {
-    const event: WorkflowEvent<Params> = {
-      payload: this.options.params,
-      timestamp: new Date(),
-      instanceId: this.options.id,
-    };
-    return this.entrypoint.run(event, this.step);
-  }
-
   async pause() {
-    this.pauseControl.pause();
+    this.setStatus({ status: "paused" });
+    this.stepPauseControl.pause();
   }
 
   async resume() {
-    this.pauseControl.resume();
+    this.setStatus({ status: "running" });
+    this.stepPauseControl.resume();
+  }
+
+  async terminate() {
+    this.setStatus({ status: "terminated" });
+    this.terminatableStep.terminate();
+    this.stepPauseControl.resume();
+  }
+
+  async status(): Promise<InstanceStatus> {
+    return this.instanceStatus;
+  }
+
+  setStatus(status: InstanceStatus) {
+    this.instanceStatus = status;
+  }
+
+  /**
+   * Waits for the workflow to finish.
+   *
+   * This method will block until the workflow has either completed or terminated.
+   */
+  async waitFor() {
+    this.setStatus({ status: "completed" });
+    await this.finishedPauseControl.waitIfPaused();
   }
 }

@@ -1,69 +1,79 @@
 import {
   NonRetryableErrorConstructor,
-  WorkflowEntrypoint,
   WorkflowEntrypointConstructor,
+  WorkflowEvent,
 } from "../workflows";
-import { WorkflowStep } from "../workflows";
+import { AbstractStep } from "./AbstractStep";
 import { PauseControl } from "./PauseControl";
+import { PauseControlStep } from "./PauseControlStep";
 import { RunTaskStep } from "./RunTaskStep";
-import {
-  WorkflowInstance,
-  WorkflowInstanceCreateOptions,
-} from "./WorkflowInstance";
+import { TerminatableStep, TerminatedError } from "./TerminatableStep";
+import { WorkflowInstance } from "./WorkflowInstance";
 
-export type NewStep = (pauseControl: PauseControl) => WorkflowStep;
+export type WorkflowInstanceCreateOptions<Params> = Readonly<{
+  id?: string;
+  params: Params;
+}>;
 
-export class Workflow<
-  Entrypoint extends WorkflowEntrypoint<Adapters, Params>,
-  Adapters,
-  Params,
-> {
-  private readonly instanceById: Map<
-    string,
-    WorkflowInstance<Entrypoint, Adapters, Params>
-  > = new Map();
+export class Workflow<Adapters, Params> {
+  private readonly instanceById = new Map<string, WorkflowInstance>();
 
   constructor(
     private readonly entrypointConstructor: WorkflowEntrypointConstructor<
       Adapters,
       Params
     >,
-    // private readonly adapters: Adapters,
     private readonly NonRetryableError: NonRetryableErrorConstructor = Error,
   ) {}
 
   async create(
     options: WorkflowInstanceCreateOptions<Params>,
     adapters: Adapters,
-    newStep: NewStep = (pauseControl) => new RunTaskStep(pauseControl),
-  ): Promise<WorkflowInstance<Entrypoint, Adapters, Params>> {
+    step: AbstractStep = new RunTaskStep(),
+  ): Promise<WorkflowInstance> {
     const entrypoint = new this.entrypointConstructor(
       adapters,
       this.NonRetryableError,
     );
 
-    const optionsWithId: WorkflowInstanceCreateOptions<Params> = {
-      ...options,
-      id: options.id || crypto.randomUUID(),
-    };
-    const id = optionsWithId.id!;
+    const id = options.id || crypto.randomUUID();
 
-    const pauseControl = new PauseControl();
-    const step = newStep(pauseControl);
-
-    const instance = new WorkflowInstance<typeof entrypoint, Adapters, Params>(
-      pauseControl,
-      entrypoint,
-      optionsWithId,
-      step,
-    ) as WorkflowInstance<Entrypoint, Adapters, Params>;
+    const stepPauseControl = new PauseControl();
+    const finishedPauseControl = new PauseControl(false);
+    const pauseControlStep = new PauseControlStep(step, stepPauseControl);
+    const terminatableStep = new TerminatableStep(pauseControlStep);
+    const instance = new WorkflowInstance(
+      id,
+      stepPauseControl,
+      finishedPauseControl,
+      terminatableStep,
+    );
     this.instanceById.set(id, instance);
+
+    const event: WorkflowEvent<Params> = {
+      payload: options.params,
+      timestamp: new Date(),
+      instanceId: id,
+    };
+    entrypoint
+      .run(event, terminatableStep)
+      .then(() => {
+        instance.setStatus({ status: "completed" });
+        finishedPauseControl.resume();
+      })
+      .catch((error) => {
+        if (error instanceof TerminatedError) {
+          instance.setStatus({ status: "terminated", error: error.message });
+        } else {
+          instance.setStatus({ status: "errored", error: error.message });
+        }
+        finishedPauseControl.resume();
+      });
+
     return instance;
   }
 
-  async get(
-    id: string,
-  ): Promise<WorkflowInstance<Entrypoint, Adapters, Params>> {
+  async get(id: string): Promise<WorkflowInstance> {
     const instance = this.instanceById.get(id);
     if (!instance) {
       throw new Error(`Workflow instance with id ${id} not found`);

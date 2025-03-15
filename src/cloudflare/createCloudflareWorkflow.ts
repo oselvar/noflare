@@ -19,7 +19,7 @@ export function createCloudflareWorkflow<
   >,
   makeAdapters: (ctx: ExecutionContext, env: Env) => Adapters,
   wrapStep: (step: WorkflowStep, adapters: Adapters) => WorkflowStep = (step) =>
-    step
+    step,
 ): CloudflareWorkflowEntrypoint<Env, Params> {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
@@ -32,7 +32,7 @@ export function createCloudflareWorkflow<
       this.adapters = makeAdapters(ctx, env);
       this.workflowEntrypoint = new WorkflowEntrypointConstructor(
         this.adapters,
-        NonRetryableError
+        NonRetryableError,
       );
     }
 
