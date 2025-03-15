@@ -86,6 +86,9 @@ export class NoflareStep implements WorkflowStep {
   }
 }
 
+/**
+ * @deprecated - use WorkflowEntrypoint.create
+ */
 export function runWorkflow<Adapters, T = unknown>(
   workflow: WorkflowEntrypoint<Adapters, T>,
   event: WorkflowEvent<T>,

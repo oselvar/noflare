@@ -1,13 +1,81 @@
 import { describe, expect, it } from "vitest";
 
-import { runWorkflow } from "../workflows";
+import {
+  NoflareStep,
+  runWorkflow,
+  WorkflowEntrypoint,
+  WorkflowEvent,
+  WorkflowStep,
+} from "../workflows";
 import { MemoryNumberStore } from "./adapters/MemoryNumberStore";
 import {
   CalculateCubeAdapters,
   CalculateCubeWorkflow,
 } from "./CalculateCubeWorkflow";
 
+type WorkflowInstanceCreateOptions<Params> = {
+  id?: string;
+  params: Params;
+};
+
+class WorkflowInstance<
+  Entrypoint extends WorkflowEntrypoint<Adapters, Params>,
+  Adapters,
+  Params,
+> {
+  constructor(
+    private readonly entrypoint: Entrypoint,
+    private readonly options: WorkflowInstanceCreateOptions<Params>,
+    private readonly step: WorkflowStep,
+  ) {}
+
+  start() {
+    const event: WorkflowEvent<Params> = {
+      payload: this.options.params,
+      timestamp: new Date(),
+      instanceId: this.options.id || crypto.randomUUID(),
+    };
+    return this.entrypoint.run(event, this.step);
+  }
+}
+
+class Workflow<
+  Entrypoint extends WorkflowEntrypoint<Adapters, Params>,
+  Adapters,
+  Params,
+> {
+  constructor(
+    private readonly entrypointClass: new (adapters: Adapters) => Entrypoint,
+    private readonly adapters: Adapters,
+  ) {}
+
+  create(
+    options: WorkflowInstanceCreateOptions<Params>,
+    step: WorkflowStep = new NoflareStep(),
+  ): WorkflowInstance<Entrypoint, Adapters, Params> {
+    const entrypoint = new this.entrypointClass(this.adapters);
+    return new WorkflowInstance(entrypoint, options, step);
+  }
+}
+
 describe("CalculateCubeWorkflow", () => {
+  it("should calculate the cube of a number (new API)", async () => {
+    const numberStore = new MemoryNumberStore();
+    const adapters: CalculateCubeAdapters = {
+      numberStore,
+    };
+    const workflow = new Workflow(CalculateCubeWorkflow, adapters);
+    const instance = workflow.create({
+      id: "test",
+      params: { value: 2 },
+    });
+
+    await instance.start();
+    const expected = 8;
+    const actual = await numberStore.getNumber("test");
+    expect(expected).toBe(actual);
+  });
+
   it("should calculate the cube of a number", async () => {
     const numberStore = new MemoryNumberStore();
     const adapters: CalculateCubeAdapters = {
