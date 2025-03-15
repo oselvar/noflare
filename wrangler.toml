@@ -2,6 +2,9 @@ name = "noflare-demo"
 main = "src/examples/index.ts"
 compatibility_date = "2024-12-05"
 
+[observability]
+enabled = true
+
 [[workflows]]
 name = "calculate-cube"
 binding = "CALCULATE_CUBE_WORKFLOW"
@@ -9,4 +12,4 @@ class_name = "CalculateCubeWorkflow"
 
 [[kv_namespaces]]
 binding = "NUMBER_STORE"
-id = "01928374650987654321"
+id = "d083ad5d194e4c05a612ca276b8ff726"

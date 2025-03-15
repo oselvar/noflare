@@ -3,11 +3,15 @@
 Noflare is a a drop-in replacement for selected Cloudflare Workers features
 that makes it easier to test Cloudflare Worker applications.
 
-Noflare does not use a local wrangler session and does not depend on the Cloudflare runtime.
+Noflare does not use a local wrangler/miniflare session and does not depend on the Cloudflare runtime.
 
 ## Motivation
 
 The library was created to make Cloudflare Workflows easier to test.
+In particular:
+
+* Idempotency
+* Pause/Resume of workflows (not implemented in wrangler/miniflare)
 
 ## Workflows
 

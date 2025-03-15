@@ -1,4 +1,5 @@
 import {
+  type Workflow,
   WorkflowEntrypoint,
   type WorkflowEvent,
   type WorkflowStep,
@@ -17,9 +18,14 @@ export type CalculateCubeParams = {
  */
 export type CalculateCubeAdapters = {
   numberStore: NumberStore;
+  workflow: Workflow<
+    CalculateCubeEntrypoint,
+    CalculateCubeAdapters,
+    CalculateCubeParams
+  >;
 };
 
-export class CalculateCubeWorkflow extends WorkflowEntrypoint<
+export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
   CalculateCubeAdapters,
   CalculateCubeParams
 > {
@@ -41,12 +47,19 @@ export class CalculateCubeWorkflow extends WorkflowEntrypoint<
         if (params.value < 0) {
           throw new this.NonRetryableError(
             "Value cannot be negative - this is a non-retryable error",
-            "the-name",
+            "the-name"
           );
         }
         return params.value * params.value;
-      },
+      }
     );
+
+    if (params.value === 42) {
+      await step.do("pause this workflow", async () => {
+        const instance = await this.adapters.workflow.get(event.instanceId);
+        await instance.pause();
+      });
+    }
 
     const cube = await step.do("calculate cube", async () => {
       return square * params.value;

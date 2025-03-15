@@ -2,26 +2,32 @@ import { WorkflowEntrypoint as CloudflareWorkflowEntrypoint } from "cloudflare:w
 import { NonRetryableError } from "cloudflare:workflows";
 
 import {
-  type NonRetryableErrorConstructor,
+  // type NonRetryableErrorConstructor,
   WorkflowEntrypoint as NoflareWorkflowEntrypoint,
+  WorkflowEntrypointConstructor,
   type WorkflowEvent,
   type WorkflowStep,
 } from "../workflows";
 
 export function createCloudflareWorkflow<
   Env,
-  T extends Rpc.Serializable<T>,
+  Params extends Rpc.Serializable<Params>,
   Adapters,
 >(
-  WorkflowImpl: new (
-    adapters: Adapters,
-    NonRetryableError: NonRetryableErrorConstructor,
-  ) => NoflareWorkflowEntrypoint<Adapters, T>,
+  WorkflowEntrypointConstructor: WorkflowEntrypointConstructor<
+    Adapters,
+    Params
+  >,
   makeAdapters: (ctx: ExecutionContext, env: Env) => Adapters,
   wrapStep: (step: WorkflowStep, adapters: Adapters) => WorkflowStep = (step) =>
     step,
 ) {
-  return class extends CloudflareWorkflowEntrypoint<Env, T> {
+  return class extends CloudflareWorkflowEntrypoint<Env, Params> {
+    private readonly workflowEntrypoint: NoflareWorkflowEntrypoint<
+      Adapters,
+      Params
+    >;
+    private readonly adapters: Adapters;
     // Redeclaring the constructor to make ctx and env public to work around tsup dts generation error:
     //   error TS4094: Property 'ctx' of exported anonymous class type may not be private or protected.
     constructor(
@@ -29,12 +35,15 @@ export function createCloudflareWorkflow<
       public readonly env: Env,
     ) {
       super(ctx, env);
+      this.adapters = makeAdapters(ctx, env);
+      this.workflowEntrypoint = new WorkflowEntrypointConstructor(
+        this.adapters,
+        NonRetryableError,
+      );
     }
 
-    async run(event: WorkflowEvent<T>, step: WorkflowStep) {
-      const adapters = makeAdapters(this.ctx, this.env);
-      const workflow = new WorkflowImpl(adapters, NonRetryableError);
-      await workflow.run(event, wrapStep(step, adapters));
+    async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
+      return this.workflowEntrypoint.run(event, wrapStep(step, this.adapters));
     }
   };
 }

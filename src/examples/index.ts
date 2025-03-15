@@ -1,9 +1,10 @@
 import { createCloudflareWorkflow } from "../cloudflare/createCloudflareWorkflow";
+import { Workflow as NoflareWorkflow } from "../workflows";
 import { KVNumberStore } from "./adapters/KVNumberStore";
 import {
   CalculateCubeAdapters,
+  CalculateCubeEntrypoint,
   CalculateCubeParams,
-  CalculateCubeWorkflow as CalculateCube,
 } from "./CalculateCubeWorkflow";
 import { Env } from "./Env";
 
@@ -11,8 +12,13 @@ const CalculateCubeWorkflow = createCloudflareWorkflow<
   Env,
   CalculateCubeParams,
   CalculateCubeAdapters
->(CalculateCube, (_ctx, env) => ({
+>(CalculateCubeEntrypoint, (_ctx, env) => ({
   numberStore: new KVNumberStore(env.NUMBER_STORE),
+  workflow: env.CALCULATE_CUBE_WORKFLOW as unknown as NoflareWorkflow<
+    CalculateCubeEntrypoint,
+    CalculateCubeAdapters,
+    CalculateCubeParams
+  >,
 }));
 
 export { CalculateCubeWorkflow };
@@ -30,8 +36,12 @@ export default {
       const numberStore = new KVNumberStore(env.NUMBER_STORE);
       const result = await numberStore.getNumber(id);
 
+      if (status.status === "paused") {
+        await instance.resume();
+      }
+
       return Response.json({
-        status: status,
+        status,
         result,
       });
     }
