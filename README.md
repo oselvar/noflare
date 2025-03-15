@@ -10,8 +10,8 @@ Noflare does not use a local wrangler/miniflare session and does not depend on t
 The library was created to make Cloudflare Workflows easier to test.
 In particular:
 
-* Idempotency
-* Pause/Resume of workflows (not implemented in wrangler/miniflare)
+- Idempotency
+- Pause/Resume of workflows (not implemented in wrangler/miniflare)
 
 ## Workflows
 

@@ -1,21 +1,15 @@
+import { Workflow } from "../impl/Workflow";
 import {
-  type Workflow,
   WorkflowEntrypoint,
   type WorkflowEvent,
   type WorkflowStep,
 } from "../workflows"; // Was: cloudflare:workers
 import { NumberStore } from "./adapters/NumberStore";
 
-/**
- * The parameters for the workflow.
- */
 export type CalculateCubeParams = {
   value: number;
 };
 
-/**
- * The adapters for the workflow.
- */
 export type CalculateCubeAdapters = {
   numberStore: NumberStore;
   workflow: Workflow<
@@ -47,11 +41,11 @@ export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
         if (params.value < 0) {
           throw new this.NonRetryableError(
             "Value cannot be negative - this is a non-retryable error",
-            "the-name"
+            "the-name",
           );
         }
         return params.value * params.value;
-      }
+      },
     );
 
     if (params.value === 42) {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { Workflow } from "../workflows";
+import { Workflow } from "../impl";
 import { MemoryNumberStore } from "./adapters/MemoryNumberStore";
 import {
   CalculateCubeAdapters,
@@ -26,7 +26,7 @@ describe("CalculateCubeWorkflow", () => {
     };
   });
 
-  it("should pause", async () => {
+  it("should pause and resume a workflow", async () => {
     const instance = await workflow.create(
       {
         id: "test",
@@ -36,7 +36,7 @@ describe("CalculateCubeWorkflow", () => {
     );
 
     const instancePromise = instance.start();
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     await instance.resume();
     await instancePromise;
     const expected = 74088;
@@ -44,58 +44,53 @@ describe("CalculateCubeWorkflow", () => {
     expect(actual).toBe(expected);
   });
 
-  // it("should calculate the cube of a number", async () => {
-  //   await runWorkflow(workflow, {
-  //     instanceId: "test",
-  //     timestamp: new Date(),
-  //     payload: { value: 2 },
-  //   });
-  //   const expected = 8;
-  //   const actual = await numberStore.getNumber("test");
-  //   expect(expected).toBe(actual);
-  // });
+  it("should calculate the cube of a number", async () => {
+    const instance = await workflow.create(
+      {
+        id: "test",
+        params: { value: 2 },
+      },
+      adapters
+    );
+    await instance.start();
 
-  // it("should throw a non-retryable error for a negative number", async () => {
-  //   const numberStore = new MemoryNumberStore();
-  //   const adapters: CalculateCubeAdapters = {
-  //     numberStore,
-  //   };
+    const expected = 8;
+    const actual = await numberStore.getNumber("test");
+    expect(actual).toEqual(expected);
+  });
 
-  //   const workflow = new CalculateCubeEntrypoint(adapters);
-  //   await expect(
-  //     runWorkflow(workflow, {
-  //       instanceId: "test",
-  //       timestamp: new Date(),
-  //       payload: { value: -1 },
-  //     })
-  //   ).rejects.toThrow(
-  //     "Value cannot be negative - this is a non-retryable error"
-  //   );
-  // });
+  it("should throw a non-retryable error for a negative number", async () => {
+    const instance = await workflow.create(
+      {
+        id: "test",
+        params: { value: -1 },
+      },
+      adapters
+    );
+    await expect(instance.start()).rejects.toThrow(
+      "Value cannot be negative - this is a non-retryable error"
+    );
+  });
 
-  // it("should run multiple workflows concurrently", async () => {
-  //   const numberStore = new MemoryNumberStore();
-  //   const adapters: CalculateCubeAdapters = {
-  //     numberStore,
-  //   };
+  it("should run multiple workflows concurrently", async () => {
+    const values = [1, 2, 3, 4];
+    const workflows = values.map(async (value) => {
+      const instance = await workflow.create(
+        {
+          id: `test-${value}`,
+          params: { value },
+        },
+        adapters
+      );
+      await instance.start();
+    });
 
-  //   const workflow = new CalculateCubeEntrypoint(adapters);
+    await Promise.all(workflows);
 
-  //   const values = [1, 2, 3, 4];
-  //   const workflows = values.map((value) => {
-  //     return runWorkflow(workflow, {
-  //       instanceId: `test-${value}`,
-  //       timestamp: new Date(),
-  //       payload: { value },
-  //     });
-  //   });
-
-  //   await Promise.all(workflows);
-
-  //   const expected = values.map((value) => value * value * value);
-  //   const actual = await Promise.all(
-  //     values.map((value) => numberStore.getNumber(`test-${value}`))
-  //   );
-  //   expect(expected).toEqual(actual);
-  // });
+    const expected = values.map((value) => value * value * value);
+    const actual = await Promise.all(
+      values.map((value) => numberStore.getNumber(`test-${value}`))
+    );
+    expect(actual).toEqual(expected);
+  });
 });
