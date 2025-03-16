@@ -41,11 +41,11 @@ export class WorkflowInstance {
   }
 
   /**
-   * Waits for the workflow to finish.
+   * Waits for the workflow to be done.
    *
-   * This method will block until the workflow has either completed or terminated.
+   * This method will block until the workflow is in the completed, errored or terminated state.
    */
-  async waitFor() {
+  async done() {
     this.setStatus({ status: "completed" });
     await this.finishedPauseControl.waitIfPaused();
   }

@@ -26,7 +26,7 @@ describe("CalculateCubeWorkflow", () => {
     const instance = await workflow.create({ params: { value: 42 } }, adapters);
     await new Promise((resolve) => setTimeout(resolve, 0));
     await instance.resume();
-    await instance.waitFor();
+    await instance.done();
     expect(await instance.status()).toEqual({ status: "completed" });
     const actual = await numberStore.getNumber(instance.id);
     expect(actual).toBe(74088);
@@ -36,7 +36,7 @@ describe("CalculateCubeWorkflow", () => {
     const instance = await workflow.create({ params: { value: 42 } }, adapters);
     await new Promise((resolve) => setTimeout(resolve, 0));
     await instance.terminate();
-    await instance.waitFor();
+    await instance.done();
     expect(await instance.status()).toEqual({
       status: "terminated",
       error: "Workflow terminated",
@@ -47,7 +47,7 @@ describe("CalculateCubeWorkflow", () => {
 
   it("should calculate the cube of a number", async () => {
     const instance = await workflow.create({ params: { value: 2 } }, adapters);
-    await instance.waitFor();
+    await instance.done();
     expect(await instance.status()).toEqual({ status: "completed" });
     const actual = await numberStore.getNumber(instance.id);
     expect(actual).toEqual(8);
@@ -55,7 +55,7 @@ describe("CalculateCubeWorkflow", () => {
 
   it("should throw a non-retryable error for a negative number", async () => {
     const instance = await workflow.create({ params: { value: -1 } }, adapters);
-    await instance.waitFor();
+    await instance.done();
     expect(await instance.status()).toEqual({
       status: "errored",
       error: "Value cannot be negative - this is a non-retryable error",
@@ -69,7 +69,7 @@ describe("CalculateCubeWorkflow", () => {
         { id: `test-${value}`, params: { value } },
         adapters,
       );
-      await instance.waitFor();
+      await instance.done();
     });
 
     await Promise.all(workflows);
