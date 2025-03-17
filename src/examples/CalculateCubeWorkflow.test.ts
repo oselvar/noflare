@@ -62,12 +62,21 @@ describe("CalculateCubeWorkflow", () => {
     });
   });
 
+  it("should throw a retryable error for zero", async () => {
+    const instance = await workflow.create({ params: { value: 0 } }, adapters);
+    await instance.done();
+    expect(await instance.status()).toEqual({
+      status: "errored",
+      error: "Value cannot be 0 - this is a retryable error",
+    });
+  });
+
   it("should run multiple workflows concurrently", async () => {
     const values = [1, 2, 3, 4];
     const workflows = values.map(async (value) => {
       const instance = await workflow.create(
         { id: `test-${value}`, params: { value } },
-        adapters,
+        adapters
       );
       await instance.done();
     });
@@ -76,7 +85,7 @@ describe("CalculateCubeWorkflow", () => {
 
     const expected = values.map((value) => value * value * value);
     const actual = await Promise.all(
-      values.map((value) => numberStore.getNumber(`test-${value}`)),
+      values.map((value) => numberStore.getNumber(`test-${value}`))
     );
     expect(actual).toEqual(expected);
   });
