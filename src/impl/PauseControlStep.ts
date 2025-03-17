@@ -1,20 +1,19 @@
-import { Task } from "../workflows";
-import { AbstractStep } from "./AbstractStep";
+import { BaseStep } from "./BaseStep";
+import { DecoratorStep } from "./DecoratorStep";
 import { PauseControl } from "./PauseControl";
 
 /**
  * A step that waits for the pause control to be resumed.
  */
-export class PauseControlStep extends AbstractStep {
+export class PauseControlStep extends DecoratorStep {
   constructor(
-    private readonly step: AbstractStep,
+    step: BaseStep,
     private readonly pauseControl: PauseControl,
   ) {
-    super();
+    super(step);
   }
 
-  async runTask<T>(task: Task<T>): Promise<T> {
+  async beforeTask() {
     await this.pauseControl.waitIfPaused();
-    return this.step.runTask(task);
   }
 }

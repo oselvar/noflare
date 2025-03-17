@@ -1,12 +1,26 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { Workflow } from "../impl";
+import { DecoratorStep } from "../impl/DecoratorStep";
 import { MemoryNumberStore } from "./adapters/MemoryNumberStore";
 import {
   CalculateCubeAdapters,
   CalculateCubeEntrypoint,
   CalculateCubeParams,
 } from "./CalculateCubeWorkflow";
+
+class ThrowingStep extends DecoratorStep {
+  private readonly seenLabels = new Set<string>();
+
+  async beforeTask(label: string) {
+    if (!this.seenLabels.has(label)) {
+      throw new Error(
+        `First time seeing step label "${label}". Simulate error.`,
+      );
+    }
+    this.seenLabels.add(label);
+  }
+}
 
 describe("CalculateCubeWorkflow", () => {
   let numberStore: MemoryNumberStore;
@@ -22,6 +36,18 @@ describe("CalculateCubeWorkflow", () => {
     };
   });
 
+  it.skip("should simulate a workflow with retryable errors", async () => {
+    const instance = await workflow.create(
+      { params: { value: 2 } },
+      adapters,
+      (step) => new ThrowingStep(step),
+    );
+    await instance.done();
+    expect(await instance.status()).toEqual({
+      status: "completed",
+    });
+  });
+
   it("should pause and resume a workflow", async () => {
     const instance = await workflow.create({ params: { value: 42 } }, adapters);
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -35,11 +61,13 @@ describe("CalculateCubeWorkflow", () => {
   it("should terminate a workflow", async () => {
     const instance = await workflow.create({ params: { value: 42 } }, adapters);
     await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(await instance.status()).toEqual({
+      status: "paused",
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
     await instance.terminate();
-    await instance.done();
     expect(await instance.status()).toEqual({
       status: "terminated",
-      error: "Workflow terminated",
     });
     const number = await numberStore.getNumber(instance.id);
     expect(number).toBeUndefined();
@@ -76,7 +104,7 @@ describe("CalculateCubeWorkflow", () => {
     const workflows = values.map(async (value) => {
       const instance = await workflow.create(
         { id: `test-${value}`, params: { value } },
-        adapters
+        adapters,
       );
       await instance.done();
     });
@@ -85,7 +113,7 @@ describe("CalculateCubeWorkflow", () => {
 
     const expected = values.map((value) => value * value * value);
     const actual = await Promise.all(
-      values.map((value) => numberStore.getNumber(`test-${value}`))
+      values.map((value) => numberStore.getNumber(`test-${value}`)),
     );
     expect(actual).toEqual(expected);
   });

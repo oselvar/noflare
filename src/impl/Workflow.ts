@@ -1,14 +1,13 @@
 import {
   NonRetryableErrorConstructor,
+  WorkflowEntrypoint,
   WorkflowEntrypointConstructor,
   WorkflowEvent,
 } from "../workflows";
-import { AbstractStep } from "./AbstractStep";
+import { BaseStep } from "./BaseStep";
 import { PauseControl } from "./PauseControl";
 import { PauseControlStep } from "./PauseControlStep";
-import { RunTaskStep } from "./RunTaskStep";
-import { TerminatableStep, TerminatedError } from "./TerminatableStep";
-import { WorkflowInstance } from "./WorkflowInstance";
+import { TerminatedError, WorkflowInstance } from "./WorkflowInstance";
 
 export type WorkflowInstanceCreateOptions<Params> = Readonly<{
   id?: string;
@@ -29,7 +28,7 @@ export class Workflow<Adapters, Params> {
   async create(
     options: WorkflowInstanceCreateOptions<Params>,
     adapters: Adapters,
-    step: AbstractStep = new RunTaskStep(),
+    wrapStep: (step: BaseStep) => BaseStep = (step) => step,
   ): Promise<WorkflowInstance> {
     const entrypoint = new this.entrypointConstructor(
       adapters,
@@ -40,13 +39,15 @@ export class Workflow<Adapters, Params> {
 
     const stepPauseControl = new PauseControl();
     const finishedPauseControl = new PauseControl(false);
-    const pauseControlStep = new PauseControlStep(step, stepPauseControl);
-    const terminatableStep = new TerminatableStep(pauseControlStep);
+
+    const baseStep = new BaseStep();
+    const pauseControlStep = new PauseControlStep(baseStep, stepPauseControl);
+    const step = wrapStep(pauseControlStep);
     const instance = new WorkflowInstance(
       id,
       stepPauseControl,
       finishedPauseControl,
-      terminatableStep,
+      step,
     );
     this.instanceById.set(id, instance);
 
@@ -55,20 +56,13 @@ export class Workflow<Adapters, Params> {
       timestamp: new Date(),
       instanceId: id,
     };
-    entrypoint
-      .run(event, terminatableStep)
-      .then(() => {
-        instance.setStatus({ status: "completed" });
-        finishedPauseControl.resume();
-      })
-      .catch((error) => {
-        if (error instanceof TerminatedError) {
-          instance.setStatus({ status: "terminated", error: error.message });
-        } else {
-          instance.setStatus({ status: "errored", error: error.message });
-        }
-        finishedPauseControl.resume();
-      });
+    runWorkflow<Adapters, Params>(
+      entrypoint,
+      event,
+      step,
+      instance,
+      finishedPauseControl,
+    );
 
     return instance;
   }
@@ -80,4 +74,27 @@ export class Workflow<Adapters, Params> {
     }
     return instance;
   }
+}
+
+function runWorkflow<Adapters, Params>(
+  entrypoint: WorkflowEntrypoint<Adapters, Params>,
+  event: WorkflowEvent<Params>,
+  step: BaseStep,
+  instance: WorkflowInstance,
+  finishedPauseControl: PauseControl,
+) {
+  entrypoint
+    .run(event, step)
+    .then(() => {
+      instance.setStatus({ status: "completed" });
+      finishedPauseControl.resume();
+    })
+    .catch((error) => {
+      if (error instanceof TerminatedError) {
+        instance.setStatus({ status: "terminated", error: error.message });
+      } else {
+        instance.setStatus({ status: "errored", error: error.message });
+      }
+      finishedPauseControl.resume();
+    });
 }
