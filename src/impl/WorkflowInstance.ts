@@ -6,12 +6,6 @@ type InstanceStatus = {
   error?: string;
 };
 
-export class TerminatedError extends Error {
-  constructor() {
-    super("Workflow terminated");
-  }
-}
-
 export class WorkflowInstance {
   private instanceStatus: InstanceStatus = { status: "running" };
 

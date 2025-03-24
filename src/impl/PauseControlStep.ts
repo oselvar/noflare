@@ -1,3 +1,5 @@
+import { WorkflowStepConfig } from "cloudflare:workers";
+
 import { BaseStep } from "./BaseStep";
 import { DecoratorStep } from "./DecoratorStep";
 import { PauseControl } from "./PauseControl";
@@ -13,7 +15,8 @@ export class PauseControlStep extends DecoratorStep {
     super(step);
   }
 
-  async beforeTask() {
+  async beforeTask(label: string, config?: WorkflowStepConfig) {
+    await super.beforeTask(label, config);
     await this.pauseControl.waitIfPaused();
   }
 }

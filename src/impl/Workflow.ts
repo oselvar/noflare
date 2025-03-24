@@ -5,9 +5,10 @@ import {
   WorkflowEvent,
 } from "../workflows";
 import { BaseStep } from "./BaseStep";
+import { RetryError, WorkflowTerminatedError } from "./errors";
 import { PauseControl } from "./PauseControl";
 import { PauseControlStep } from "./PauseControlStep";
-import { TerminatedError, WorkflowInstance } from "./WorkflowInstance";
+import { WorkflowInstance } from "./WorkflowInstance";
 
 export type WorkflowInstanceCreateOptions<Params> = Readonly<{
   id?: string;
@@ -90,8 +91,16 @@ function runWorkflow<Adapters, Params>(
       finishedPauseControl.resume();
     })
     .catch((error) => {
-      if (error instanceof TerminatedError) {
+      if (error instanceof WorkflowTerminatedError) {
         instance.setStatus({ status: "terminated", error: error.message });
+      } else if (error instanceof RetryError) {
+        return runWorkflow(
+          entrypoint,
+          event,
+          step,
+          instance,
+          finishedPauseControl,
+        );
       } else {
         instance.setStatus({ status: "errored", error: error.stack });
       }

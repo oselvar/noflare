@@ -1,26 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { Workflow } from "../impl";
-import { DecoratorStep } from "../impl/DecoratorStep";
+import { ThrowFirstTimeStep } from "../impl/ThrowFirstTimeStep";
 import { MemoryNumberStore } from "./adapters/MemoryNumberStore";
 import {
   CalculateCubeAdapters,
   CalculateCubeEntrypoint,
   CalculateCubeParams,
 } from "./CalculateCubeWorkflow";
-
-class ThrowingStep extends DecoratorStep {
-  private readonly seenLabels = new Set<string>();
-
-  async beforeTask(label: string) {
-    if (!this.seenLabels.has(label)) {
-      throw new Error(
-        `First time seeing step label "${label}". Simulate error.`,
-      );
-    }
-    this.seenLabels.add(label);
-  }
-}
 
 describe("CalculateCubeWorkflow", () => {
   let numberStore: MemoryNumberStore;
@@ -36,11 +23,11 @@ describe("CalculateCubeWorkflow", () => {
     };
   });
 
-  it.skip("should simulate a workflow with retryable errors", async () => {
+  it("should simulate a workflow with retryable errors", async () => {
     const instance = await workflow.create(
       { params: { value: 2 } },
       adapters,
-      (step) => new ThrowingStep(step),
+      (step) => new ThrowFirstTimeStep(step),
     );
     await instance.done();
     expect(await instance.status()).toEqual({

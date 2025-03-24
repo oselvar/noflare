@@ -1,8 +1,11 @@
 import { Task, WorkflowStep, WorkflowStepConfig } from "../workflows";
-import { TerminatedError as WorkflowTerminatedError } from "./WorkflowInstance";
+import { RetryError, WorkflowTerminatedError } from "./errors";
+
+const DEFAULT_RETRY_LIMIT = 3;
 
 export class BaseStep implements WorkflowStep {
   private _workflowTerminated = false;
+  private executionCountByLabel = new Map<string, number>();
 
   async do<T>(
     label: string,
@@ -28,8 +31,19 @@ export class BaseStep implements WorkflowStep {
       throw new WorkflowTerminatedError();
     }
 
-    await this.beforeTask(label, _config);
-    return _task();
+    const executionCount = this.executionCountByLabel.get(label) || 0;
+    this.executionCountByLabel.set(label, executionCount + 1);
+
+    try {
+      await this.beforeTask(label, _config);
+      return await _task();
+    } catch (error) {
+      const retryLimit = _config?.retries?.limit ?? DEFAULT_RETRY_LIMIT;
+      if (executionCount <= retryLimit) {
+        throw new RetryError();
+      }
+      throw error;
+    }
   }
 
   workflowTerminated() {
