@@ -23,7 +23,7 @@ describe("CalculateCubeWorkflow", () => {
     };
   });
 
-  it("should simulate a workflow with retryable errors", async () => {
+  it("should simulate a workflow with flaky steps", async () => {
     const instance = await workflow.create(
       { params: { value: 2 } },
       adapters,

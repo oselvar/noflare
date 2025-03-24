@@ -9,8 +9,8 @@ import { DecoratorStep } from "./DecoratorStep";
 export class ThrowFirstTimeStep extends DecoratorStep {
   private readonly seenLabels = new Set<string>();
 
-  override async beforeTask(label: string, config?: WorkflowStepConfig) {
-    await super.beforeTask(label, config);
+  override async afterTask(label: string, config?: WorkflowStepConfig) {
+    await super.afterTask(label, config);
     const seenBefore = this.seenLabels.has(label);
     this.seenLabels.add(label);
     if (!seenBefore) {

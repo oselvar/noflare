@@ -10,6 +10,10 @@ export class DecoratorStep extends BaseStep {
     return this.step.beforeTask(label, config);
   }
 
+  override afterTask(label: string, config?: WorkflowStepConfig) {
+    return this.step.afterTask(label, config);
+  }
+
   override workflowTerminated() {
     return this.step.workflowTerminated();
   }
