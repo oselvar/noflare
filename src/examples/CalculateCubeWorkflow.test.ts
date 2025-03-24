@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { Workflow } from "../impl";
-import { ThrowFirstTimeStep } from "../impl/ThrowFirstTimeStep";
+import { ThrowFirstTimeStep, Workflow } from "../impl";
 import { MemoryNumberStore } from "./adapters/MemoryNumberStore";
 import {
   CalculateCubeAdapters,
