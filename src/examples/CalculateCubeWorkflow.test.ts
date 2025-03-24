@@ -84,19 +84,21 @@ describe("CalculateCubeWorkflow", () => {
   it("should throw a non-retryable error for a negative number", async () => {
     const instance = await workflow.create({ params: { value: -1 } }, adapters);
     await instance.done();
-    expect(await instance.status()).toEqual({
-      status: "errored",
-      error: "Value cannot be negative - this is a non-retryable error",
-    });
+    const status = await instance.status();
+    expect(status.status).toEqual("errored");
+    expect(status.error).toMatch(
+      /Error: Value cannot be negative - this is a non-retryable error/,
+    );
   });
 
   it("should throw a retryable error for zero", async () => {
     const instance = await workflow.create({ params: { value: 0 } }, adapters);
     await instance.done();
-    expect(await instance.status()).toEqual({
-      status: "errored",
-      error: "Value cannot be 0 - this is a retryable error",
-    });
+    const status = await instance.status();
+    expect(status.status).toEqual("errored");
+    expect(status.error).toMatch(
+      /Error: Value cannot be 0 - this is a retryable error/,
+    );
   });
 
   it("should run multiple workflows concurrently", async () => {

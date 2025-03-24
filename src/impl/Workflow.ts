@@ -93,7 +93,7 @@ function runWorkflow<Adapters, Params>(
       if (error instanceof TerminatedError) {
         instance.setStatus({ status: "terminated", error: error.message });
       } else {
-        instance.setStatus({ status: "errored", error: error.message });
+        instance.setStatus({ status: "errored", error: error.stack });
       }
       finishedPauseControl.resume();
     });
