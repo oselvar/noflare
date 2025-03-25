@@ -3,3 +3,5 @@ export class WorkflowTerminatedError extends Error {
     super("Workflow terminated");
   }
 }
+
+export class NoflareNonRetryableError extends Error {}

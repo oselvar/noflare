@@ -1,5 +1,5 @@
 import { Task, WorkflowStep, WorkflowStepConfig } from "../workflows";
-import { WorkflowTerminatedError } from "./errors";
+import { NoflareNonRetryableError, WorkflowTerminatedError } from "./errors";
 
 const DEFAULT_RETRY_LIMIT = 3;
 
@@ -26,20 +26,22 @@ export class BaseStep implements WorkflowStep {
     if (!_task) {
       throw new Error("No task provided");
     }
-    if (this._workflowTerminated) {
-      throw new WorkflowTerminatedError();
-    }
-
     const retryLimit = _config?.retries?.limit ?? DEFAULT_RETRY_LIMIT;
 
     let lastError: Error | undefined;
     for (let i = 0; i < retryLimit; i++) {
+      if (this._workflowTerminated) {
+        throw new WorkflowTerminatedError();
+      }
       try {
         await this.beforeTask(label, _config);
         const result = await _task();
         await this.afterTask(label, _config);
         return result;
       } catch (error) {
+        if (error instanceof NoflareNonRetryableError) {
+          throw error;
+        }
         lastError = error as Error;
       }
     }

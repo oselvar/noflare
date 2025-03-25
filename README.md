@@ -8,18 +8,43 @@ Noflare does not use a local wrangler/miniflare session and does not depend on t
 ## Motivation
 
 The library was created to make Cloudflare Workflows easier to test.
-In particular:
+In particular _Idempotency_.
 
-- Idempotency
-- Pause/Resume of workflows (not implemented in wrangler/miniflare)
+If you have decided to use Clouflare Workflows, chances are high that
+some of your steps are going to fail occasionally.
+
+This might even be why you decided to use Clouflare Workflows in the first place,
+so you can benefit from automatic retries.
+
+But there is a catch. Your steps must be [idempotent](https://developers.cloudflare.com/workflows/build/rules-of-workflows/#ensure-apibinding-calls-are-idempotent).
+
+Making sure your steps are _actually_ idempotent is difficult.
+A compiler won't help you - there won't be any compilation errors
+for a step that isn't idempotent.
+
+The steps have to be _tested_. Every single one of them.
+
+You could do this by extracting every single step body to a separate function,
+then write a unit test that runs it twice.
+
+This is very cumbersone.
+
+Noflare takes a different approach.
 
 Idempotency is verified by throwing an error the first time a step is run.
 This happens _after_ the step's `do` block, simulating a flaky step.
 
-This causes the step to run again - simulating flakiness in the step.
+This causes the step to run again.
 
 There is one exception - if the step calls `WorkflowInstance.pause()`,
 then the error is not thrown.
+
+## Pause/Resume
+
+Pause/Resume of workflows is not implemented in wrangler/miniflare,
+making it impossible to test in a local development environment.
+
+Noflare implements pause/resume, so you can test it from your unit tests.
 
 ## Workflows
 

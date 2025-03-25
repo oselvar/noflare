@@ -1,7 +1,9 @@
+import { NoflareNonRetryableError } from "./impl/errors";
+
 export abstract class WorkflowEntrypoint<Adapters, Params> {
   constructor(
     protected readonly adapters: Adapters,
-    protected readonly NonRetryableError: NonRetryableErrorConstructor = Error,
+    protected readonly NonRetryableError: NonRetryableErrorConstructor = NoflareNonRetryableError,
   ) {}
   abstract run(
     event: WorkflowEvent<Params>,

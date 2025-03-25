@@ -80,7 +80,7 @@ export class Workflow<Adapters, Params> {
 function runWorkflow<Adapters, Params>(
   entrypoint: WorkflowEntrypoint<Adapters, Params>,
   event: WorkflowEvent<Params>,
-  step: BaseStep,
+  step: ThrowFirstTimeStep,
   instance: WorkflowInstance,
   finishedPauseControl: PauseControl,
 ) {
@@ -92,6 +92,7 @@ function runWorkflow<Adapters, Params>(
     })
     .catch((error) => {
       if (error instanceof WorkflowTerminatedError) {
+        step.workflowTerminated();
         instance.setStatus({ status: "terminated", error: error.message });
       } else {
         instance.setStatus({ status: "errored", error: error.stack });
