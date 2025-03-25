@@ -3,5 +3,3 @@ export class WorkflowTerminatedError extends Error {
     super("Workflow terminated");
   }
 }
-
-export class RetryError extends Error {}

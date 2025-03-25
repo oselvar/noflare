@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { ThrowFirstTimeStep, Workflow } from "../impl";
+import { Workflow } from "../impl";
 import { MemoryNumberStore } from "./adapters/MemoryNumberStore";
 import {
   CalculateCubeAdapters,
@@ -23,11 +23,7 @@ describe("CalculateCubeWorkflow", () => {
   });
 
   it("should simulate a workflow with flaky steps", async () => {
-    const instance = await workflow.create(
-      { params: { value: 2 } },
-      adapters,
-      (step) => new ThrowFirstTimeStep(step),
-    );
+    const instance = await workflow.create({ params: { value: 2 } }, adapters);
     await instance.done();
     expect(await instance.status()).toEqual({
       status: "completed",

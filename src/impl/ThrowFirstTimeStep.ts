@@ -13,6 +13,9 @@ export class ThrowFirstTimeStep extends DecoratorStep {
     await super.afterTask(label, config);
     const seenBefore = this.seenLabels.has(label);
     this.seenLabels.add(label);
+    if (label.includes("pause")) {
+      return;
+    }
     if (!seenBefore) {
       throw new Error(
         `First time seeing step label "${label}". Simulate error.`,

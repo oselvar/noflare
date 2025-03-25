@@ -15,8 +15,8 @@ export class PauseControlStep extends DecoratorStep {
     super(step);
   }
 
-  async beforeTask(label: string, config?: WorkflowStepConfig) {
-    await super.beforeTask(label, config);
+  async afterTask(label: string, config?: WorkflowStepConfig) {
+    await super.afterTask(label, config);
     await this.pauseControl.waitIfPaused();
   }
 }

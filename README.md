@@ -13,6 +13,14 @@ In particular:
 - Idempotency
 - Pause/Resume of workflows (not implemented in wrangler/miniflare)
 
+Idempotency is verified by throwing an error the first time a step is run.
+This happens _after_ the step's `do` block, simulating a flaky step.
+
+This causes the step to run again - simulating flakiness in the step.
+
+There is one exception - if the step calls `WorkflowInstance.pause()`,
+then the error is not thrown.
+
 ## Workflows
 
 Cloudflare Workflows embody critical business logic that is important to test.
