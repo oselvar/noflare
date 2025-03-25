@@ -5,9 +5,11 @@ import {
   WorkflowEvent,
 } from "../workflows";
 import { BaseStep } from "./BaseStep";
+import { WorkflowTerminatedError } from "./errors";
 import { PauseControl } from "./PauseControl";
 import { PauseControlStep } from "./PauseControlStep";
-import { TerminatedError, WorkflowInstance } from "./WorkflowInstance";
+import { ThrowFirstTimeStep } from "./ThrowFirstTimeStep";
+import { WorkflowInstance } from "./WorkflowInstance";
 
 export type WorkflowInstanceCreateOptions<Params> = Readonly<{
   id?: string;
@@ -28,7 +30,6 @@ export class Workflow<Adapters, Params> {
   async create(
     options: WorkflowInstanceCreateOptions<Params>,
     adapters: Adapters,
-    wrapStep: (step: BaseStep) => BaseStep = (step) => step,
   ): Promise<WorkflowInstance> {
     const entrypoint = new this.entrypointConstructor(
       adapters,
@@ -42,7 +43,7 @@ export class Workflow<Adapters, Params> {
 
     const baseStep = new BaseStep();
     const pauseControlStep = new PauseControlStep(baseStep, stepPauseControl);
-    const step = wrapStep(pauseControlStep);
+    const step = new ThrowFirstTimeStep(pauseControlStep);
     const instance = new WorkflowInstance(
       id,
       stepPauseControl,
@@ -79,7 +80,7 @@ export class Workflow<Adapters, Params> {
 function runWorkflow<Adapters, Params>(
   entrypoint: WorkflowEntrypoint<Adapters, Params>,
   event: WorkflowEvent<Params>,
-  step: BaseStep,
+  step: ThrowFirstTimeStep,
   instance: WorkflowInstance,
   finishedPauseControl: PauseControl,
 ) {
@@ -90,7 +91,8 @@ function runWorkflow<Adapters, Params>(
       finishedPauseControl.resume();
     })
     .catch((error) => {
-      if (error instanceof TerminatedError) {
+      if (error instanceof WorkflowTerminatedError) {
+        step.workflowTerminated();
         instance.setStatus({ status: "terminated", error: error.message });
       } else {
         instance.setStatus({ status: "errored", error: error.stack });

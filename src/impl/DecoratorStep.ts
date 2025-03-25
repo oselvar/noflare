@@ -6,11 +6,12 @@ export class DecoratorStep extends BaseStep {
     super();
   }
 
-  override async beforeTask(
-    label: string,
-    config?: WorkflowStepConfig,
-  ): Promise<void> {
+  override beforeTask(label: string, config?: WorkflowStepConfig) {
     return this.step.beforeTask(label, config);
+  }
+
+  override afterTask(label: string, config?: WorkflowStepConfig) {
+    return this.step.afterTask(label, config);
   }
 
   override workflowTerminated() {

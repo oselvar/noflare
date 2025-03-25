@@ -1,5 +1,7 @@
 import { Task, WorkflowStep, WorkflowStepConfig } from "../workflows";
-import { TerminatedError as WorkflowTerminatedError } from "./WorkflowInstance";
+import { NoflareNonRetryableError, WorkflowTerminatedError } from "./errors";
+
+const DEFAULT_RETRY_LIMIT = 3;
 
 export class BaseStep implements WorkflowStep {
   private _workflowTerminated = false;
@@ -24,12 +26,26 @@ export class BaseStep implements WorkflowStep {
     if (!_task) {
       throw new Error("No task provided");
     }
-    if (this._workflowTerminated) {
-      throw new WorkflowTerminatedError();
-    }
+    const retryLimit = _config?.retries?.limit ?? DEFAULT_RETRY_LIMIT;
 
-    await this.beforeTask(label, _config);
-    return _task();
+    let lastError: Error | undefined;
+    for (let i = 0; i < retryLimit; i++) {
+      if (this._workflowTerminated) {
+        throw new WorkflowTerminatedError();
+      }
+      try {
+        await this.beforeTask(label, _config);
+        const result = await _task();
+        await this.afterTask(label, _config);
+        return result;
+      } catch (error) {
+        if (error instanceof NoflareNonRetryableError) {
+          throw error;
+        }
+        lastError = error as Error;
+      }
+    }
+    throw lastError;
   }
 
   workflowTerminated() {
@@ -37,6 +53,15 @@ export class BaseStep implements WorkflowStep {
   }
 
   public beforeTask(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _label: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _config?: WorkflowStepConfig,
+  ): Promise<void> {
+    return Promise.resolve();
+  }
+
+  public afterTask(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _label: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
