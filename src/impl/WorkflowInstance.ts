@@ -1,5 +1,5 @@
 import { PauseControl } from "./PauseControl";
-import { TerminatableStep } from "./TerminatableStep";
+import { WorkflowStepImpl } from "./WorkflowStepImpl";
 
 type InstanceStatus = {
   status: "running" | "paused" | "completed" | "errored" | "terminated";
@@ -13,7 +13,7 @@ export class WorkflowInstance {
     public readonly id: string,
     private readonly stepPauseControl: PauseControl,
     private readonly finishedPauseControl: PauseControl,
-    private readonly terminatableStep: TerminatableStep,
+    private readonly workflowStep: WorkflowStepImpl,
   ) {}
 
   async pause() {
@@ -28,7 +28,7 @@ export class WorkflowInstance {
 
   async terminate() {
     this.setStatus({ status: "terminated" });
-    this.terminatableStep.terminate();
+    this.workflowStep.terminate();
     this.stepPauseControl.resume();
   }
 

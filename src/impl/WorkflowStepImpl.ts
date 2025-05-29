@@ -5,8 +5,19 @@ import {
   WorkflowStepEvent,
   WorkflowTimeoutDuration,
 } from "../workflows";
+import { PauseControl } from "./PauseControl";
 
-export abstract class AbstractStep implements WorkflowStep {
+export class TerminatedError extends Error {
+  constructor() {
+    super("Workflow terminated");
+  }
+}
+
+export class WorkflowStepImpl implements WorkflowStep {
+  private terminated = false;
+
+  constructor(private readonly pauseControl: PauseControl) {}
+
   async do<T>(
     label: string,
     configOrTask: WorkflowStepConfig | Task<T>,
@@ -28,7 +39,13 @@ export abstract class AbstractStep implements WorkflowStep {
     return this.runTask(_task);
   }
 
-  abstract runTask<T>(task: Task<T>): Promise<T>;
+  async runTask<T>(task: Task<T>): Promise<T> {
+    if (this.terminated) {
+      throw new TerminatedError();
+    }
+    await this.pauseControl.waitIfPaused();
+    return task();
+  }
 
   waitForEvent<T extends Rpc.Serializable<T>>(
     name: string,
@@ -39,5 +56,9 @@ export abstract class AbstractStep implements WorkflowStep {
   ): Promise<WorkflowStepEvent<T>> {
     console.log(name, options);
     throw new Error("Not implemented");
+  }
+
+  terminate() {
+    this.terminated = true;
   }
 }

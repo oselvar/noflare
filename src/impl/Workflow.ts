@@ -3,12 +3,9 @@ import {
   WorkflowEntrypointConstructor,
   WorkflowEvent,
 } from "../workflows";
-import { AbstractStep } from "./AbstractStep";
 import { PauseControl } from "./PauseControl";
-import { PauseControlStep } from "./PauseControlStep";
-import { RunTaskStep } from "./RunTaskStep";
-import { TerminatableStep, TerminatedError } from "./TerminatableStep";
 import { WorkflowInstance } from "./WorkflowInstance";
+import { TerminatedError, WorkflowStepImpl } from "./WorkflowStepImpl";
 
 export type WorkflowInstanceCreateOptions<Params> = Readonly<{
   id?: string;
@@ -29,7 +26,6 @@ export class Workflow<Adapters, Params> {
   async create(
     options: WorkflowInstanceCreateOptions<Params>,
     adapters: Adapters,
-    step: AbstractStep = new RunTaskStep(),
   ): Promise<WorkflowInstance> {
     const entrypoint = new this.entrypointConstructor(
       adapters,
@@ -40,13 +36,12 @@ export class Workflow<Adapters, Params> {
 
     const stepPauseControl = new PauseControl();
     const finishedPauseControl = new PauseControl(false);
-    const pauseControlStep = new PauseControlStep(step, stepPauseControl);
-    const terminatableStep = new TerminatableStep(pauseControlStep);
+    const workflowStep = new WorkflowStepImpl(stepPauseControl);
     const instance = new WorkflowInstance(
       id,
       stepPauseControl,
       finishedPauseControl,
-      terminatableStep,
+      workflowStep,
     );
     this.instanceById.set(id, instance);
 
@@ -56,7 +51,7 @@ export class Workflow<Adapters, Params> {
       instanceId: id,
     };
     entrypoint
-      .run(event, terminatableStep)
+      .run(event, workflowStep)
       .then(() => {
         instance.setStatus({ status: "completed" });
         finishedPauseControl.resume();
