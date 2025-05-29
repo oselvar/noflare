@@ -78,7 +78,7 @@ describe("CalculateCubeWorkflow", () => {
     const workflows = values.map(async (value) => {
       const instance = await workflow.create(
         { id: `test-${value}`, params: { value } },
-        adapters
+        adapters,
       );
       await instance.done();
     });
@@ -87,7 +87,7 @@ describe("CalculateCubeWorkflow", () => {
 
     const expected = values.map((value) => value * value * value);
     const actual = await Promise.all(
-      values.map((value) => numberStore.getNumber(`test-${value}`))
+      values.map((value) => numberStore.getNumber(`test-${value}`)),
     );
     expect(actual).toEqual(expected);
   });
