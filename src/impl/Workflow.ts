@@ -1,7 +1,8 @@
-import {
+import type { WorkflowEvent } from "cloudflare:workers";
+
+import type {
   NonRetryableErrorConstructor,
   WorkflowEntrypointConstructor,
-  WorkflowEvent,
 } from "../workflows";
 import { PauseControl } from "./PauseControl";
 import { WorkflowInstance } from "./WorkflowInstance";

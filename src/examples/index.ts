@@ -2,11 +2,11 @@ import { createCloudflareWorkflow } from "../cloudflare/createCloudflareWorkflow
 import { Workflow as NoflareWorkflow } from "../impl/Workflow";
 import { KVNumberStore } from "./adapters/KVNumberStore";
 import {
-  CalculateCubeAdapters,
+  type CalculateCubeAdapters,
   CalculateCubeEntrypoint,
-  CalculateCubeParams,
+  type CalculateCubeParams,
 } from "./CalculateCubeWorkflow";
-import { Env } from "./Env";
+import type { Env } from "./Env";
 
 const CalculateCubeWorkflow = createCloudflareWorkflow<
   Env,

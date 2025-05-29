@@ -1,4 +1,4 @@
-import { NumberStore } from "./NumberStore";
+import type { NumberStore } from "./NumberStore";
 
 export class MemoryNumberStore implements NumberStore {
   private numbers: Map<string, number> = new Map();

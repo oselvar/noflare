@@ -8,6 +8,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
     "module": "esnext",
     "noEmit": true,
     "target": "esnext",

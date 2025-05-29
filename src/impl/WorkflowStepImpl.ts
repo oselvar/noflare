@@ -1,10 +1,11 @@
-import {
-  Task,
+import type {
+  WorkflowSleepDuration,
   WorkflowStep,
   WorkflowStepConfig,
   WorkflowStepEvent,
   WorkflowTimeoutDuration,
-} from "../workflows";
+} from "cloudflare:workers";
+
 import { PauseControl } from "./PauseControl";
 
 export class TerminatedError extends Error {
@@ -12,6 +13,8 @@ export class TerminatedError extends Error {
     super("Workflow terminated");
   }
 }
+
+type Task<T> = () => Promise<T>;
 
 export class WorkflowStepImpl implements WorkflowStep {
   private terminated = false;
@@ -45,6 +48,16 @@ export class WorkflowStepImpl implements WorkflowStep {
     }
     await this.pauseControl.waitIfPaused();
     return task();
+  }
+
+  sleep(name: string, duration: WorkflowSleepDuration): Promise<void> {
+    console.log(name, duration);
+    throw new Error("Not implemented");
+  }
+
+  sleepUntil(name: string, timestamp: Date | number): Promise<void> {
+    console.log(name, timestamp);
+    throw new Error("Not implemented");
   }
 
   waitForEvent<T extends Rpc.Serializable<T>>(

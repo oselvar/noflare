@@ -1,3 +1,5 @@
+import type { WorkflowEvent, WorkflowStep } from "cloudflare:workers";
+
 export abstract class WorkflowEntrypoint<Adapters, Params> {
   constructor(
     protected readonly adapters: Adapters,
@@ -18,59 +20,3 @@ export interface NonRetryableErrorConstructor {
   new (message: string, name?: string): Error;
   readonly prototype: Error;
 }
-
-export interface WorkflowStep {
-  do<T>(
-    label: string,
-    config: WorkflowStepConfig,
-    task: () => Promise<T>,
-  ): Promise<T>;
-  do<T>(label: string, task: () => Promise<T>): Promise<T>;
-
-  waitForEvent<T extends Rpc.Serializable<T>>(
-    name: string,
-    options: {
-      type: string;
-      timeout?: WorkflowTimeoutDuration | number;
-    },
-  ): Promise<WorkflowStepEvent<T>>;
-}
-
-export type WorkflowEvent<T> = {
-  payload: Readonly<T>;
-  timestamp: Date;
-  instanceId: string;
-};
-
-export type WorkflowStepEvent<T> = {
-  payload: Readonly<T>;
-  timestamp: Date;
-  type: string;
-};
-
-export type WorkflowStepConfig = {
-  retries?: {
-    limit: number;
-    delay: WorkflowDelayDuration | number;
-    backoff?: WorkflowBackoff;
-  };
-  timeout?: WorkflowTimeoutDuration | number;
-};
-
-type WorkflowBackoff = "constant" | "linear" | "exponential";
-type WorkflowDurationLabel =
-  | "second"
-  | "minute"
-  | "hour"
-  | "day"
-  | "week"
-  | "month"
-  | "year";
-
-type WorkflowSleepDuration =
-  | `${number} ${WorkflowDurationLabel}${"s" | ""}`
-  | number;
-type WorkflowDelayDuration = WorkflowSleepDuration;
-export type WorkflowTimeoutDuration = WorkflowSleepDuration;
-
-export type Task<T> = () => Promise<T>;

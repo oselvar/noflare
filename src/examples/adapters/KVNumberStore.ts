@@ -1,4 +1,4 @@
-import { NumberStore } from "./NumberStore";
+import type { NumberStore } from "./NumberStore";
 
 export class KVNumberStore implements NumberStore {
   constructor(private readonly kv: KVNamespace) {}

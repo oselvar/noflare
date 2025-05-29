@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { Workflow } from "../impl";
 import { MemoryNumberStore } from "./adapters/MemoryNumberStore";
 import {
-  CalculateCubeAdapters,
+  type CalculateCubeAdapters,
   CalculateCubeEntrypoint,
-  CalculateCubeParams,
+  type CalculateCubeParams,
 } from "./CalculateCubeWorkflow";
 
 describe("CalculateCubeWorkflow", () => {

@@ -1,10 +1,8 @@
+import type { WorkflowEvent, WorkflowStep } from "cloudflare:workers";
+
 import { Workflow } from "../impl/Workflow";
-import {
-  WorkflowEntrypoint,
-  type WorkflowEvent,
-  type WorkflowStep,
-} from "../workflows"; // Was: cloudflare:workers
-import { NumberStore } from "./adapters/NumberStore";
+import { WorkflowEntrypoint } from "../workflows"; // Was: cloudflare:workers
+import type { NumberStore } from "./adapters/NumberStore";
 
 export type CalculateCubeParams = {
   value: number;
