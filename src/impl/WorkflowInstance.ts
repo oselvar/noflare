@@ -1,16 +1,10 @@
-import { BaseStep } from "./BaseStep";
 import { PauseControl } from "./PauseControl";
+import { TerminatableStep } from "./TerminatableStep";
 
 type InstanceStatus = {
   status: "running" | "paused" | "completed" | "errored" | "terminated";
   error?: string;
 };
-
-export class TerminatedError extends Error {
-  constructor() {
-    super("Workflow terminated");
-  }
-}
 
 export class WorkflowInstance {
   private instanceStatus: InstanceStatus = { status: "running" };
@@ -19,7 +13,7 @@ export class WorkflowInstance {
     public readonly id: string,
     private readonly stepPauseControl: PauseControl,
     private readonly finishedPauseControl: PauseControl,
-    private readonly step: BaseStep,
+    private readonly terminatableStep: TerminatableStep,
   ) {}
 
   async pause() {
@@ -34,7 +28,7 @@ export class WorkflowInstance {
 
   async terminate() {
     this.setStatus({ status: "terminated" });
-    this.step.workflowTerminated();
+    this.terminatableStep.terminate();
     this.stepPauseControl.resume();
   }
 
@@ -52,7 +46,7 @@ export class WorkflowInstance {
    * This method will block until the workflow is in the completed, errored or terminated state.
    */
   async done() {
-    // this.setStatus({ status: "completed" });
+    this.setStatus({ status: "completed" });
     await this.finishedPauseControl.waitIfPaused();
   }
 }
