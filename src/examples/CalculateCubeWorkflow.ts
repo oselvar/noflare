@@ -51,6 +51,13 @@ export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
       });
     }
 
+    if (params.value === 43) {
+      await step.waitForEvent("Wait for the sun to shine", {
+        type: "sun-shines",
+        timeout: "1 minute",
+      });
+    }
+
     const cube = await step.do("calculate cube", async () => {
       return square * params.value;
     });

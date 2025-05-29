@@ -1,4 +1,10 @@
-import { Task, WorkflowStep, WorkflowStepConfig } from "../workflows";
+import {
+  Task,
+  WorkflowStep,
+  WorkflowStepConfig,
+  WorkflowStepEvent,
+  WorkflowTimeoutDuration,
+} from "../workflows";
 
 export abstract class AbstractStep implements WorkflowStep {
   async do<T>(
@@ -23,4 +29,15 @@ export abstract class AbstractStep implements WorkflowStep {
   }
 
   abstract runTask<T>(task: Task<T>): Promise<T>;
+
+  waitForEvent<T extends Rpc.Serializable<T>>(
+    name: string,
+    options: {
+      type: string;
+      timeout?: WorkflowTimeoutDuration | number;
+    },
+  ): Promise<WorkflowStepEvent<T>> {
+    console.log(name, options);
+    throw new Error("Not implemented");
+  }
 }

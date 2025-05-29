@@ -26,12 +26,26 @@ export interface WorkflowStep {
     task: () => Promise<T>,
   ): Promise<T>;
   do<T>(label: string, task: () => Promise<T>): Promise<T>;
+
+  waitForEvent<T extends Rpc.Serializable<T>>(
+    name: string,
+    options: {
+      type: string;
+      timeout?: WorkflowTimeoutDuration | number;
+    },
+  ): Promise<WorkflowStepEvent<T>>;
 }
 
 export type WorkflowEvent<T> = {
   payload: Readonly<T>;
   timestamp: Date;
   instanceId: string;
+};
+
+export type WorkflowStepEvent<T> = {
+  payload: Readonly<T>;
+  timestamp: Date;
+  type: string;
 };
 
 export type WorkflowStepConfig = {
@@ -57,6 +71,6 @@ type WorkflowSleepDuration =
   | `${number} ${WorkflowDurationLabel}${"s" | ""}`
   | number;
 type WorkflowDelayDuration = WorkflowSleepDuration;
-type WorkflowTimeoutDuration = WorkflowSleepDuration;
+export type WorkflowTimeoutDuration = WorkflowSleepDuration;
 
 export type Task<T> = () => Promise<T>;
