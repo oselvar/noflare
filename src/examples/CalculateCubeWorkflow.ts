@@ -50,10 +50,16 @@ export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
     }
 
     if (params.value === 43) {
-      await step.waitForEvent("Wait for the sun to shine", {
-        type: "sun-shines",
-        timeout: "1 minute",
-      });
+      const weather = await step.waitForEvent<number>(
+        "Wait for the sun to shine",
+        {
+          type: "weather",
+          timeout: "1 minute",
+        },
+      );
+      if (weather.payload !== 143) {
+        throw new Error("Weather is not 143");
+      }
     }
 
     const cube = await step.do("calculate cube", async () => {

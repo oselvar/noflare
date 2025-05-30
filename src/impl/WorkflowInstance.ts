@@ -16,6 +16,10 @@ export class WorkflowInstance {
     private readonly workflowStep: WorkflowStepImpl,
   ) {}
 
+  async sendEvent(params: { type: string; payload: unknown }): Promise<void> {
+    this.workflowStep.sendEvent(params);
+  }
+
   async pause() {
     this.setStatus({ status: "paused" });
     this.stepPauseControl.pause();

@@ -32,6 +32,16 @@ describe("CalculateCubeWorkflow", () => {
     expect(actual).toBe(74088);
   });
 
+  it("should wait for event and resume when it happens", async () => {
+    const instance = await workflow.create({ params: { value: 43 } }, adapters);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await instance.sendEvent({ type: "weather", payload: 143 });
+    await instance.done();
+    expect(await instance.status()).toEqual({ status: "completed" });
+    const actual = await numberStore.getNumber(instance.id);
+    expect(actual).toBe(79507);
+  });
+
   it("should terminate a workflow", async () => {
     const instance = await workflow.create({ params: { value: 42 } }, adapters);
     await new Promise((resolve) => setTimeout(resolve, 0));

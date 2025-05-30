@@ -18,6 +18,8 @@ type Task<T> = () => Promise<T>;
 
 export class WorkflowStepImpl implements WorkflowStep {
   private terminated = false;
+  private eventPauseControls: Map<string, PauseControl> = new Map();
+  private eventData: Map<string, unknown> = new Map();
 
   constructor(private readonly pauseControl: PauseControl) {}
 
@@ -60,15 +62,38 @@ export class WorkflowStepImpl implements WorkflowStep {
     throw new Error("Not implemented");
   }
 
-  waitForEvent<T extends Rpc.Serializable<T>>(
-    name: string,
+  async waitForEvent<T extends Rpc.Serializable<T>>(
+    _name: string,
     options: {
       type: string;
       timeout?: WorkflowTimeoutDuration | number;
     },
   ): Promise<WorkflowStepEvent<T>> {
-    console.log(name, options);
-    throw new Error("Not implemented");
+    let pauseControl = this.eventPauseControls.get(options.type);
+    if (!pauseControl) {
+      pauseControl = new PauseControl();
+      this.eventPauseControls.set(options.type, pauseControl);
+    }
+    pauseControl.pause();
+    await pauseControl.waitIfPaused();
+    const payload = this.eventData.get(options.type);
+    if (!payload) {
+      throw new Error(`No payload for event type ${options.type}`);
+    }
+    return {
+      type: options.type,
+      payload: payload as T,
+      timestamp: new Date(),
+    };
+  }
+
+  async sendEvent(params: { type: string; payload: unknown }): Promise<void> {
+    const pauseControl = this.eventPauseControls.get(params.type);
+    if (!pauseControl) {
+      throw new Error(`No pause control for event type ${params.type}`);
+    }
+    this.eventData.set(params.type, params.payload);
+    pauseControl.resume();
   }
 
   terminate() {
