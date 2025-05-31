@@ -14,12 +14,19 @@ export class TerminatedError extends Error {
   }
 }
 
+export class TimeoutError extends Error {
+  constructor(eventType: string, timeout: number | WorkflowTimeoutDuration) {
+    super(`Timeout waiting for event '${eventType}' after ${timeout}`);
+  }
+}
+
 type Task<T> = () => Promise<T>;
 
 export class WorkflowStepImpl implements WorkflowStep {
   private terminated = false;
   private eventPauseControls: Map<string, PauseControl> = new Map();
   private eventData: Map<string, unknown> = new Map();
+  private timeoutEvents: Set<string> = new Set();
 
   constructor(private readonly pauseControl: PauseControl) {}
 
@@ -76,6 +83,11 @@ export class WorkflowStepImpl implements WorkflowStep {
     }
     pauseControl.pause();
     await pauseControl.waitIfPaused();
+
+    if (this.timeoutEvents.has(options.type)) {
+      throw new TimeoutError(options.type, options.timeout || 0);
+    }
+
     const payload = this.eventData.get(options.type);
     if (!payload) {
       throw new Error(`No payload for event type ${options.type}`);
@@ -98,5 +110,13 @@ export class WorkflowStepImpl implements WorkflowStep {
 
   terminate() {
     this.terminated = true;
+  }
+
+  triggerTimeout(eventType: string): void {
+    this.timeoutEvents.add(eventType);
+    const pauseControl = this.eventPauseControls.get(eventType);
+    if (pauseControl) {
+      pauseControl.resume();
+    }
   }
 }

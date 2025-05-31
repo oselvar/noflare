@@ -20,6 +20,10 @@ export class WorkflowInstance {
     this.workflowStep.sendEvent(params);
   }
 
+  triggerTimeout(eventType: string): void {
+    this.workflowStep.triggerTimeout(eventType);
+  }
+
   async pause() {
     this.setStatus({ status: "paused" });
     this.stepPauseControl.pause();
