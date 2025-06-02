@@ -54,7 +54,7 @@ export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
         "Wait for the sun to shine",
         {
           type: "weather",
-          timeout: "1 minute",
+          timeout: "10 seconds",
         },
       );
       if (weather.payload !== 143) {

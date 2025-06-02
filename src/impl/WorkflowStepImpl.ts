@@ -76,6 +76,10 @@ export class WorkflowStepImpl implements WorkflowStep {
       timeout?: WorkflowTimeoutDuration | number;
     },
   ): Promise<WorkflowStepEvent<T>> {
+    if (this.timeoutEvents.has(options.type)) {
+      throw new TimeoutError(options.type, options.timeout || 0);
+    }
+
     let pauseControl = this.eventPauseControls.get(options.type);
     if (!pauseControl) {
       pauseControl = new PauseControl();

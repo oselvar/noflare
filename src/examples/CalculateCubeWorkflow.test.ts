@@ -102,18 +102,30 @@ describe("CalculateCubeWorkflow", () => {
     expect(actual).toEqual(expected);
   });
 
-  it("should timeout when waiting for an event that never arrives", async () => {
+  it("should timeout when timeout is triggered after run", async () => {
     const instance = await workflow.create({ params: { value: 43 } }, adapters);
-    await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // Trigger timeout instead of sending the event
+    await new Promise((resolve) => setTimeout(resolve, 0));
     instance.triggerTimeout("weather");
 
     await instance.done();
     const status = await instance.status();
     expect(status.status).toEqual("errored");
     expect(status.error).toMatch(
-      /Timeout waiting for event 'weather' after 1 minute/,
+      /Timeout waiting for event 'weather' after 10 seconds/,
+    );
+  });
+
+  it("should timeout when timeout is triggered before run", async () => {
+    const instance = await workflow.create({ params: { value: 43 } }, adapters);
+    instance.triggerTimeout("weather");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    await instance.done();
+    const status = await instance.status();
+    expect(status.status).toEqual("errored");
+    expect(status.error).toMatch(
+      /Timeout waiting for event 'weather' after 10 seconds/,
     );
   });
 });

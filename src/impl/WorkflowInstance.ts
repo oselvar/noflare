@@ -54,7 +54,6 @@ export class WorkflowInstance {
    * This method will block until the workflow is in the completed, errored or terminated state.
    */
   async done() {
-    this.setStatus({ status: "completed" });
     await this.finishedPauseControl.waitIfPaused();
   }
 }
