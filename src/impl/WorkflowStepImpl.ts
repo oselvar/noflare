@@ -59,14 +59,12 @@ export class WorkflowStepImpl implements WorkflowStep {
     return task();
   }
 
-  sleep(name: string, duration: WorkflowSleepDuration): Promise<void> {
-    console.log(name, duration);
-    throw new Error("Not implemented");
+  async sleep(_name: string, _duration: WorkflowSleepDuration): Promise<void> {
+    // no-op
   }
 
-  sleepUntil(name: string, timestamp: Date | number): Promise<void> {
-    console.log(name, timestamp);
-    throw new Error("Not implemented");
+  async sleepUntil(_name: string, _timestamp: Date | number): Promise<void> {
+    // no-op
   }
 
   async waitForEvent<T extends Rpc.Serializable<T>>(

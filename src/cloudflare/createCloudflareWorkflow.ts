@@ -5,10 +5,8 @@ import {
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
 
-import {
-  WorkflowEntrypoint,
-  type WorkflowEntrypointConstructor,
-} from "../workflows";
+import type { WorkflowEntrypoint } from "../workflows";
+import { type WorkflowEntrypointConstructor } from "../workflows";
 
 export function createCloudflareWorkflow<
   Env,

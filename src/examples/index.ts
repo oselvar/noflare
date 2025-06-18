@@ -1,5 +1,5 @@
 import { createCloudflareWorkflow } from "../cloudflare/createCloudflareWorkflow";
-import { Workflow as NoflareWorkflow } from "../impl/Workflow";
+import type { Workflow as NoflareWorkflow } from "../impl/Workflow";
 import { KVNumberStore } from "./adapters/KVNumberStore";
 import {
   type CalculateCubeAdapters,

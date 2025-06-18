@@ -40,9 +40,18 @@ export default ts.config(
       import: importPlugin,
     },
     rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-non-null-assertion": "error",
+      "@typescript-eslint/ban-ts-comment": "error",
+      "@typescript-eslint/consistent-type-imports": "error",
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
       "import/no-extraneous-dependencies": "error",
+      "no-console": "warn",
     },
   },
 );

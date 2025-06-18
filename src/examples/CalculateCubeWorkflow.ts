@@ -1,6 +1,6 @@
 import type { WorkflowEvent, WorkflowStep } from "cloudflare:workers";
 
-import { Workflow } from "../impl/Workflow";
+import type { Workflow } from "../impl/Workflow";
 import { WorkflowEntrypoint } from "../workflows"; // Was: cloudflare:workers
 import type { NumberStore } from "./adapters/NumberStore";
 
