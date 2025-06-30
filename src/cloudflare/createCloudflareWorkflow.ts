@@ -9,15 +9,18 @@ import { Workflow } from "../impl/Workflow";
 import type { WorkflowEntrypoint } from "../workflows";
 import { type WorkflowEntrypointConstructor } from "../workflows";
 
+export type WrapStep<Env, Params extends Rpc.Serializable<Params>> = (
+  step: WorkflowStep,
+  ctx: ExecutionContext,
+  env: Env,
+) => WorkflowStep;
+
 export function createCloudflareWorkflow<
   Env,
   Params extends Rpc.Serializable<Params>,
 >(
   WorkflowEntrypointConstructor: WorkflowEntrypointConstructor<Env, Params>,
-  wrapStep: (
-    step: WorkflowStep,
-    entrypoint: CloudflareWorkflowEntrypoint<Params>,
-  ) => WorkflowStep = (step) => step,
+  wrapStep: WrapStep<Env, Params> = (step) => step,
 ): CloudflareWorkflowEntrypoint<Env, Params> {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
@@ -36,9 +39,10 @@ export function createCloudflareWorkflow<
     }
 
     override async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      return this.workflowEntrypoint.run(event, wrapStep(step, this));
+      return this.workflowEntrypoint.run(
+        event,
+        wrapStep(step, this.ctx, this.env),
+      );
     }
   };
 }

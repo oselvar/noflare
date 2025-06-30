@@ -14,16 +14,16 @@ describe("CalculateCubeWorkflow", () => {
 
   beforeEach(() => {
     numberStore = new MemoryNumberStore();
-    const env: TestEnv = {
-      type: "test",
-      TEST_NUMBER_STORE: numberStore,
-    };
     const ctx: ExecutionContext = {
       waitUntil: () => {},
       passThroughOnException: () => {},
       props: {},
       exports: {},
       abort: () => {},
+    };
+    const env: TestEnv = {
+      type: "test",
+      TEST_NUMBER_STORE: numberStore,
     };
     workflow = new Workflow(CalculateCubeEntrypoint, ctx, env);
   });
