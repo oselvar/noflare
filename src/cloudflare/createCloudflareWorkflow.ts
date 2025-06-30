@@ -5,7 +5,7 @@ import {
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
 
-import { Workflow } from "../impl/Workflow";
+import { Workflow } from "../Workflow";
 import type { WorkflowEntrypoint } from "../workflows";
 import { type WorkflowEntrypointConstructor } from "../workflows";
 
@@ -36,7 +36,12 @@ export function createCloudflareWorkflow<
         env,
         NonRetryableError,
       );
-      this.workflowEntrypoint = new WorkflowEntrypointConstructor(workflow);
+      this.workflowEntrypoint = new WorkflowEntrypointConstructor(
+        workflow,
+        ctx,
+        env,
+        NonRetryableError,
+      );
     }
 
     override async run(event: WorkflowEvent<Params>, step: WorkflowStep) {

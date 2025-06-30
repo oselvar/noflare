@@ -1,12 +1,12 @@
 import type { WorkflowEvent } from "cloudflare:workers";
 
+import { PauseControl } from "./impl/PauseControl";
+import { WorkflowInstance } from "./impl/WorkflowInstance";
+import { TerminatedError, WorkflowStepImpl } from "./impl/WorkflowStepImpl";
 import type {
   NonRetryableErrorConstructor,
   WorkflowEntrypointConstructor,
-} from "../workflows";
-import { PauseControl } from "./PauseControl";
-import { WorkflowInstance } from "./WorkflowInstance";
-import { TerminatedError, WorkflowStepImpl } from "./WorkflowStepImpl";
+} from "./workflows";
 
 export type WorkflowInstanceCreateOptions<Params> = Readonly<{
   id?: string;
@@ -21,15 +21,20 @@ export class Workflow<Env, Params> {
       Env,
       Params
     >,
-    public readonly ctx: ExecutionContext,
-    public readonly env: Env,
-    public readonly NonRetryableError: NonRetryableErrorConstructor = Error,
+    private readonly ctx: ExecutionContext,
+    private readonly env: Env,
+    private readonly NonRetryableError: NonRetryableErrorConstructor = Error,
   ) {}
 
   async create(
     options: WorkflowInstanceCreateOptions<Params>,
   ): Promise<WorkflowInstance> {
-    const entrypoint = new this.entrypointConstructor(this);
+    const entrypoint = new this.entrypointConstructor(
+      this,
+      this.ctx,
+      this.env,
+      this.NonRetryableError,
+    );
 
     const id = options.id || crypto.randomUUID();
 
