@@ -1,6 +1,6 @@
 {
   "name": "@oselvar/noflare",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Test helpers for Cloudflare Workers",
   "publishConfig": {
     "access": "public"
