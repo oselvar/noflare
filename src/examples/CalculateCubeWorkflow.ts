@@ -1,23 +1,19 @@
 import type { WorkflowEvent, WorkflowStep } from "cloudflare:workers";
 
-import type { Workflow } from "../impl/Workflow";
 import { WorkflowEntrypoint } from "../workflows"; // Was: cloudflare:workers
-import type { NumberStore } from "./adapters/NumberStore";
+import { makeAdapters } from "./adapters/Adapters";
+import type { TestEnv } from "./TestEnv";
 
 export type CalculateCubeParams = {
   value: number;
 };
 
-export type CalculateCubeAdapters = {
-  numberStore: NumberStore;
-  workflow: Workflow<CalculateCubeAdapters, CalculateCubeParams>;
-};
-
 export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
-  CalculateCubeAdapters,
+  Env | TestEnv,
   CalculateCubeParams
 > {
   async run(event: WorkflowEvent<CalculateCubeParams>, step: WorkflowStep) {
+    const { numberStore } = makeAdapters(this.workflow.env);
     const params = event.payload;
 
     const square = await step.do(
@@ -33,7 +29,7 @@ export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
           throw new Error("Value cannot be 0 - this is a retryable error");
         }
         if (params.value < 0) {
-          throw new this.NonRetryableError(
+          throw new this.workflow.NonRetryableError(
             "Value cannot be negative - this is a non-retryable error",
             "the-name",
           );
@@ -44,7 +40,7 @@ export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
 
     if (params.value === 42) {
       await step.do("pause this workflow", async () => {
-        const instance = await this.adapters.workflow.get(event.instanceId);
+        const instance = await this.workflow.get(event.instanceId);
         await instance.pause();
       });
     }
@@ -67,7 +63,7 @@ export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
     });
 
     await step.do("store cube", async () => {
-      await this.adapters.numberStore.putNumber(event.instanceId, cube);
+      await numberStore.putNumber(event.instanceId, cube);
     });
   }
 }

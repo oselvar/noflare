@@ -13,25 +13,23 @@ export type WorkflowInstanceCreateOptions<Params> = Readonly<{
   params: Params;
 }>;
 
-export class Workflow<Adapters, Params> {
+export class Workflow<Env, Params> {
   private readonly instanceById = new Map<string, WorkflowInstance>();
 
   constructor(
     private readonly entrypointConstructor: WorkflowEntrypointConstructor<
-      Adapters,
+      Env,
       Params
     >,
-    private readonly NonRetryableError: NonRetryableErrorConstructor = Error,
+    public readonly ctx: ExecutionContext,
+    public readonly env: Env,
+    public readonly NonRetryableError: NonRetryableErrorConstructor = Error,
   ) {}
 
   async create(
     options: WorkflowInstanceCreateOptions<Params>,
-    adapters: Adapters,
   ): Promise<WorkflowInstance> {
-    const entrypoint = new this.entrypointConstructor(
-      adapters,
-      this.NonRetryableError,
-    );
+    const entrypoint = new this.entrypointConstructor(this);
 
     const id = options.id || crypto.randomUUID();
 
