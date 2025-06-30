@@ -11,6 +11,7 @@ import { type WorkflowEntrypointConstructor } from "../workflows";
 
 export type WrapStep<Env> = (
   step: WorkflowStep,
+  instanceId: string,
   ctx: ExecutionContext,
   env: Env,
 ) => WorkflowStep;
@@ -41,7 +42,7 @@ export function createCloudflareWorkflow<
     override async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
       return this.workflowEntrypoint.run(
         event,
-        wrapStep(step, this.ctx, this.env),
+        wrapStep(step, event.instanceId, this.ctx, this.env),
       );
     }
   };
