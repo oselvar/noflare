@@ -9,7 +9,7 @@ import { Workflow } from "../impl/Workflow";
 import type { WorkflowEntrypoint } from "../workflows";
 import { type WorkflowEntrypointConstructor } from "../workflows";
 
-export type WrapStep<Env, Params extends Rpc.Serializable<Params>> = (
+export type WrapStep<Env> = (
   step: WorkflowStep,
   ctx: ExecutionContext,
   env: Env,
@@ -20,7 +20,7 @@ export function createCloudflareWorkflow<
   Params extends Rpc.Serializable<Params>,
 >(
   WorkflowEntrypointConstructor: WorkflowEntrypointConstructor<Env, Params>,
-  wrapStep: WrapStep<Env, Params> = (step) => step,
+  wrapStep: WrapStep<Env> = (step) => step,
 ): CloudflareWorkflowEntrypoint<Env, Params> {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
