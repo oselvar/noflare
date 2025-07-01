@@ -46,13 +46,10 @@ export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
     }
 
     if (params.value === 43) {
-      const weather = await step.waitForEvent<number>(
-        "Wait for the sun to shine",
-        {
-          type: "weather",
-          timeout: "10 seconds",
-        },
-      );
+      const weather = await step.waitForEvent<number>("Wait for the sun to shine", {
+        type: "weather",
+        timeout: "10 seconds",
+      });
       if (weather.payload !== 143) {
         throw new Error("Weather is not 143");
       }

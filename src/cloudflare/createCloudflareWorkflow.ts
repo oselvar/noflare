@@ -16,10 +16,7 @@ export type WrapStep<Env> = (
   env: Env,
 ) => WorkflowStep;
 
-export function createCloudflareWorkflow<
-  Env,
-  Params extends Rpc.Serializable<Params>,
->(
+export function createCloudflareWorkflow<Env, Params extends Rpc.Serializable<Params>>(
   WorkflowEntrypointConstructor: WorkflowEntrypointConstructor<Env, Params>,
   wrapStep: WrapStep<Env> = (step) => step,
 ): CloudflareWorkflowEntrypoint<Env, Params> {
@@ -30,12 +27,7 @@ export function createCloudflareWorkflow<
 
     constructor(ctx: ExecutionContext, env: Env) {
       super(ctx, env);
-      const workflow = new Workflow(
-        WorkflowEntrypointConstructor,
-        ctx,
-        env,
-        NonRetryableError,
-      );
+      const workflow = new Workflow(WorkflowEntrypointConstructor, ctx, env, NonRetryableError);
       this.workflowEntrypoint = new WorkflowEntrypointConstructor(
         workflow,
         ctx,

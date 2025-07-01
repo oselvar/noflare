@@ -10,10 +10,7 @@ export abstract class WorkflowEntrypoint<Env, Params> {
     protected readonly NonRetryableError: NonRetryableErrorConstructor,
   ) {}
 
-  abstract run(
-    event: WorkflowEvent<Params>,
-    step: WorkflowStep,
-  ): Promise<unknown>;
+  abstract run(event: WorkflowEvent<Params>, step: WorkflowStep): Promise<unknown>;
 }
 
 export type WorkflowEntrypointConstructor<Env, Params> = new (

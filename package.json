@@ -25,10 +25,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./impl": {
-      "types": "./dist/impl/index.d.ts",
-      "import": "./dist/impl/index.js"
-    },
     "./cloudflare": {
       "types": "./dist/cloudflare/index.d.ts",
       "import": "./dist/cloudflare/index.js"
@@ -40,7 +36,7 @@
   "scripts": {
     "test": "vitest",
     "start": "wrangler dev --port 9875",
-    "fix": "tsc && prettier --write . && eslint --fix .",
+    "fix": "tsc && eslint --fix . && prettier --write .",
     "build": "tsup",
     "prepublishOnly": "npm run build",
     "upgrade": "npm-check-updates --upgrade --deep"

@@ -2,10 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { Workflow } from "../Workflow";
 import { MemoryNumberStore } from "./adapters/MemoryNumberStore";
-import {
-  CalculateCubeEntrypoint,
-  type CalculateCubeParams,
-} from "./CalculateCubeWorkflow";
+import { CalculateCubeEntrypoint, type CalculateCubeParams } from "./CalculateCubeWorkflow";
 import type { TestEnv } from "./TestEnv";
 
 describe("CalculateCubeWorkflow", () => {
@@ -74,9 +71,7 @@ describe("CalculateCubeWorkflow", () => {
     await instance.done();
     const status = await instance.status();
     expect(status.status).toEqual("errored");
-    expect(status.error).toMatch(
-      /Value cannot be negative - this is a non-retryable error/,
-    );
+    expect(status.error).toMatch(/Value cannot be negative - this is a non-retryable error/);
   });
 
   it("should throw a retryable error for zero", async () => {
@@ -84,9 +79,7 @@ describe("CalculateCubeWorkflow", () => {
     await instance.done();
     const status = await instance.status();
     expect(status.status).toEqual("errored");
-    expect(status.error).toMatch(
-      /Value cannot be 0 - this is a retryable error/,
-    );
+    expect(status.error).toMatch(/Value cannot be 0 - this is a retryable error/);
   });
 
   it("should run multiple workflows concurrently", async () => {
@@ -102,9 +95,7 @@ describe("CalculateCubeWorkflow", () => {
     await Promise.all(workflows);
 
     const expected = values.map((value) => value * value * value);
-    const actual = await Promise.all(
-      values.map((value) => numberStore.getNumber(`test-${value}`)),
-    );
+    const actual = await Promise.all(values.map((value) => numberStore.getNumber(`test-${value}`)));
     expect(actual).toEqual(expected);
   });
 
@@ -117,9 +108,7 @@ describe("CalculateCubeWorkflow", () => {
     await instance.done();
     const status = await instance.status();
     expect(status.status).toEqual("errored");
-    expect(status.error).toMatch(
-      /Timeout waiting for event 'weather' after 10 seconds/,
-    );
+    expect(status.error).toMatch(/Timeout waiting for event 'weather' after 10 seconds/);
   });
 
   it("should timeout when timeout is triggered before run", async () => {
@@ -130,8 +119,6 @@ describe("CalculateCubeWorkflow", () => {
     await instance.done();
     const status = await instance.status();
     expect(status.status).toEqual("errored");
-    expect(status.error).toMatch(
-      /Timeout waiting for event 'weather' after 10 seconds/,
-    );
+    expect(status.error).toMatch(/Timeout waiting for event 'weather' after 10 seconds/);
   });
 });
