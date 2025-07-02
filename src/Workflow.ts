@@ -31,7 +31,7 @@ export class Workflow<Env, Params> {
     const id = options.id || crypto.randomUUID();
 
     const stepPauseControl = new PauseControl();
-    const finishedPauseControl = new PauseControl(false);
+    const finishedPauseControl = new PauseControl(true);
     const workflowStep = new WorkflowStepImpl(stepPauseControl);
     const instance = new WorkflowInstance(id, stepPauseControl, finishedPauseControl, workflowStep);
     this.instanceById.set(id, instance);

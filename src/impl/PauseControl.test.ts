@@ -14,7 +14,7 @@ describe("PauseControl", () => {
   });
 
   it("should support creating in paused state", () => {
-    const pausedControl = new PauseControl(false);
+    const pausedControl = new PauseControl(true);
     expect(pausedControl.isActive()).toBe(false);
   });
 
