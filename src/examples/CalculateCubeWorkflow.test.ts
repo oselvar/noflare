@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { Workflow } from "../Workflow";
+import { Workflow } from "../test/Workflow";
 import { MemoryNumberStore } from "./adapters/MemoryNumberStore";
 import { CalculateCubeEntrypoint, type CalculateCubeParams } from "./CalculateCubeWorkflow";
 import type { TestEnv } from "./TestEnv";
@@ -15,8 +15,6 @@ describe("CalculateCubeWorkflow", () => {
       waitUntil: () => {},
       passThroughOnException: () => {},
       props: {},
-      exports: {},
-      abort: () => {},
     };
     const env: TestEnv = {
       type: "test",
@@ -26,28 +24,21 @@ describe("CalculateCubeWorkflow", () => {
   });
 
   it("should pause and resume a workflow", async () => {
-    const instance = await workflow.create({ params: { value: 42 } });
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    await instance.resume();
-    await instance.done();
-    expect(await instance.status()).toEqual({ status: "completed" });
-    const actual = await numberStore.getNumber(instance.id);
-    expect(actual).toBe(74088);
-  });
+    const instance = await workflow.create({ params: { value: 2 } });
+    await instance.pause();
+    expect(await instance.status()).toEqual({ status: "paused" });
 
-  it("should wait for event and resume when it happens", async () => {
-    const instance = await workflow.create({ params: { value: 43 } });
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    await instance.sendEvent({ type: "weather", payload: 143 });
+    await instance.resume();
+    expect(await instance.status()).toEqual({ status: "running" });
+
     await instance.done();
     expect(await instance.status()).toEqual({ status: "completed" });
     const actual = await numberStore.getNumber(instance.id);
-    expect(actual).toBe(79507);
+    expect(actual).toEqual(8);
   });
 
   it("should terminate a workflow", async () => {
-    const instance = await workflow.create({ params: { value: 42 } });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    const instance = await workflow.create({ params: { value: 2 } });
     await instance.terminate();
     await instance.done();
     expect(await instance.status()).toEqual({

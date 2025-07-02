@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts", "src/cloudflare/index.ts"],
+  entry: ["src/index.ts", "src/cloudflare/index.ts", "src/test/index.ts"],
   splitting: false,
   sourcemap: true,
   clean: true,

@@ -38,13 +38,6 @@ export class CalculateCubeEntrypoint extends WorkflowEntrypoint<
       },
     );
 
-    if (params.value === 42) {
-      await step.do("pause this workflow", async () => {
-        const instance = await this.workflow.get(event.instanceId);
-        await instance.pause();
-      });
-    }
-
     if (params.value === 43) {
       const weather = await step.waitForEvent<number>("Wait for the sun to shine", {
         type: "weather",
