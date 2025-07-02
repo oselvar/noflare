@@ -1,5 +1,5 @@
-import type { PauseControl } from "./PauseControl";
-import type { WorkflowStepImpl } from "./WorkflowStepImpl";
+import type { PauseControl } from "../impl/PauseControl";
+import type { WorkflowStepImpl } from "../impl/WorkflowStepImpl";
 
 type InstanceStatus = {
   status: "running" | "paused" | "completed" | "errored" | "terminated";

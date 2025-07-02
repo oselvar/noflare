@@ -1,2 +1,2 @@
-export * from "./WorkflowInstance";
+export * from "../test/WorkflowInstance";
 export * from "./WorkflowStepImpl";
