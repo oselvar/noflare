@@ -45,8 +45,10 @@ export class Workflow<Env, Params> {
       .catch((error) => {
         if (error instanceof TerminatedError) {
           instance.setStatus({ status: "terminated", error: error.message });
+        } else if (error instanceof Error) {
+          instance.setStatus({ status: "errored", error: error.stack || error.message });
         } else {
-          instance.setStatus({ status: "errored", error: error.message });
+          instance.setStatus({ status: "errored", error: String(error) });
         }
         finishedPauseControl.resume();
       });
