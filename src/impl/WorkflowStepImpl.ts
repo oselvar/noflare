@@ -1,7 +1,9 @@
 import type {
+  StepPromise,
   WorkflowSleepDuration,
   WorkflowStep,
   WorkflowStepConfig,
+  WorkflowStepContext,
   WorkflowStepEvent,
   WorkflowTimeoutDuration,
 } from "cloudflare:workers";
@@ -20,7 +22,21 @@ export class TimeoutError extends Error {
   }
 }
 
-type Task<T> = () => Promise<T>;
+type StepCallback<T> = (ctx: WorkflowStepContext) => Promise<T>;
+
+function toStepPromise<T>(promise: Promise<T>): StepPromise<T> {
+  const stepPromise = promise as StepPromise<T>;
+  stepPromise.rollback = (() => stepPromise) as StepPromise<T>["rollback"];
+  return stepPromise;
+}
+
+function makeStepContext(name: string, config: WorkflowStepConfig = {}): WorkflowStepContext {
+  return {
+    step: { name, count: 0 },
+    attempt: 1,
+    config,
+  };
+}
 
 export class WorkflowStepImpl implements WorkflowStep {
   private terminated = false;
@@ -30,50 +46,62 @@ export class WorkflowStepImpl implements WorkflowStep {
 
   constructor(private readonly pauseControl: PauseControl) {}
 
-  async do<T>(
-    label: string,
-    configOrTask: WorkflowStepConfig | Task<T>,
-    task?: Task<T>,
-  ): Promise<T> {
-    if (!label) {
-      throw new Error("Label is required");
+  do<T extends Rpc.Serializable<T>>(name: string, callback: StepCallback<T>): StepPromise<T>;
+  do<T extends Rpc.Serializable<T>>(
+    name: string,
+    config: WorkflowStepConfig,
+    callback: StepCallback<T>,
+  ): StepPromise<T>;
+  do<T extends Rpc.Serializable<T>>(
+    name: string,
+    configOrCallback: WorkflowStepConfig | StepCallback<T>,
+    callback?: StepCallback<T>,
+  ): StepPromise<T> {
+    if (!name) {
+      throw new Error("Name is required");
     }
-    let _task: Task<T> | undefined;
-    if (typeof configOrTask === "function") {
-      _task = configOrTask;
+    const cb = typeof configOrCallback === "function" ? configOrCallback : callback;
+    const config = typeof configOrCallback === "function" ? undefined : configOrCallback;
+    if (!cb) {
+      throw new Error("No callback provided");
     }
-    if (typeof task === "function") {
-      _task = task;
-    }
-    if (!_task) {
-      throw new Error("No task provided");
-    }
-    return this.runTask(_task);
+    return toStepPromise(this.runTask(name, config, cb));
   }
 
-  async runTask<T>(task: Task<T>): Promise<T> {
+  private async runTask<T>(
+    name: string,
+    config: WorkflowStepConfig | undefined,
+    callback: StepCallback<T>,
+  ): Promise<T> {
     if (this.terminated) {
       throw new TerminatedError();
     }
     await this.pauseControl.waitIfPaused();
-    return task();
+    return callback(makeStepContext(name, config));
   }
 
-  async sleep(_name: string, _duration: WorkflowSleepDuration): Promise<void> {
+  sleep = async (_name: string, _duration: WorkflowSleepDuration): Promise<void> => {
     // no-op
-  }
+  };
 
-  async sleepUntil(_name: string, _timestamp: Date | number): Promise<void> {
+  sleepUntil = async (_name: string, _timestamp: Date | number): Promise<void> => {
     // no-op
-  }
+  };
 
-  async waitForEvent<T extends Rpc.Serializable<T>>(
+  waitForEvent<T extends Rpc.Serializable<T>>(
     _name: string,
     options: {
       type: string;
       timeout?: WorkflowTimeoutDuration | number;
     },
-  ): Promise<WorkflowStepEvent<T>> {
+  ): StepPromise<WorkflowStepEvent<T>> {
+    return toStepPromise(this.awaitEvent<T>(options));
+  }
+
+  private async awaitEvent<T>(options: {
+    type: string;
+    timeout?: WorkflowTimeoutDuration | number;
+  }): Promise<WorkflowStepEvent<T>> {
     if (this.timeoutEvents.has(options.type)) {
       throw new TimeoutError(options.type, options.timeout || 0);
     }
