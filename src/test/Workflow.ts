@@ -1,9 +1,9 @@
 import type { WorkflowEvent } from "cloudflare:workers";
 
-import { PauseControl } from "../impl/PauseControl";
-import { TerminatedError, WorkflowStepImpl } from "../impl/WorkflowStepImpl";
-import type { NonRetryableErrorConstructor, WorkflowEntrypointConstructor } from "../workflows";
-import { WorkflowInstance } from "./WorkflowInstance";
+import { PauseControl } from "../impl/PauseControl.js";
+import { TerminatedError, WorkflowStepImpl } from "../impl/WorkflowStepImpl.js";
+import type { NonRetryableErrorConstructor, WorkflowEntrypointConstructor } from "../workflows.js";
+import { WorkflowInstance } from "./WorkflowInstance.js";
 
 export type WorkflowInstanceCreateOptions<Params> = Readonly<{
   id?: string;

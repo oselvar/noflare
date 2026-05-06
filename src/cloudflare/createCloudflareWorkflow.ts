@@ -5,8 +5,8 @@ import {
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
 
-import type { WorkflowEntrypoint } from "../workflows";
-import { type WorkflowEntrypointConstructor } from "../workflows";
+import type { WorkflowEntrypoint } from "../workflows.js";
+import { type WorkflowEntrypointConstructor } from "../workflows.js";
 
 export type WrapStep<Env> = (
   step: WorkflowStep,

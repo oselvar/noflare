@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { Workflow } from "../test/Workflow";
-import { MemoryNumberStore } from "./adapters/MemoryNumberStore";
-import { CalculateCubeEntrypoint, type CalculateCubeParams } from "./CalculateCubeWorkflow";
-import type { TestEnv } from "./TestEnv";
+import { Workflow } from "../test/Workflow.js";
+import { MemoryNumberStore } from "./adapters/MemoryNumberStore.js";
+import { CalculateCubeEntrypoint, type CalculateCubeParams } from "./CalculateCubeWorkflow.js";
+import type { TestEnv } from "./TestEnv.js";
 
 describe("CalculateCubeWorkflow", () => {
   let numberStore: MemoryNumberStore;

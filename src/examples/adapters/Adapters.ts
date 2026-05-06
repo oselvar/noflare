@@ -1,6 +1,6 @@
-import type { TestEnv } from "../TestEnv";
-import { KVNumberStore } from "./KVNumberStore";
-import type { NumberStore } from "./NumberStore";
+import type { TestEnv } from "../TestEnv.js";
+import { KVNumberStore } from "./KVNumberStore.js";
+import type { NumberStore } from "./NumberStore.js";
 
 export type Adapters = {
   numberStore: NumberStore;

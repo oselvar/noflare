@@ -1,2 +1,2 @@
-export * from "./test/Workflow";
-export * from "./workflows";
+export * from "./test/Workflow.js";
+export * from "./workflows.js";

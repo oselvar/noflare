@@ -1,4 +1,4 @@
-import type { NumberStore } from "./NumberStore";
+import type { NumberStore } from "./NumberStore.js";
 
 export class MemoryNumberStore implements NumberStore {
   private numbers: Map<string, number> = new Map();

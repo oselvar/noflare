@@ -1,7 +1,7 @@
-import { createCloudflareWorkflow } from "../cloudflare/createCloudflareWorkflow";
-import { KVNumberStore } from "./adapters/KVNumberStore";
-import { CalculateCubeEntrypoint, type CalculateCubeParams } from "./CalculateCubeWorkflow";
-import type { TestEnv } from "./TestEnv";
+import { createCloudflareWorkflow } from "../cloudflare/createCloudflareWorkflow.js";
+import { KVNumberStore } from "./adapters/KVNumberStore.js";
+import { CalculateCubeEntrypoint, type CalculateCubeParams } from "./CalculateCubeWorkflow.js";
+import type { TestEnv } from "./TestEnv.js";
 
 const CalculateCubeWorkflow = createCloudflareWorkflow<Env | TestEnv, CalculateCubeParams>(
   CalculateCubeEntrypoint,

@@ -1,2 +1,2 @@
-export * from "./Workflow";
-export * from "./WorkflowInstance";
+export * from "./Workflow.js";
+export * from "./WorkflowInstance.js";

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { PauseControl } from "./PauseControl";
+import { PauseControl } from "./PauseControl.js";
 
 describe("PauseControl", () => {
   let pauseControl: PauseControl;

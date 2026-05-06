@@ -1,8 +1,8 @@
 import type { WorkflowEvent, WorkflowStep } from "cloudflare:workers";
 
-import { WorkflowEntrypoint } from "../workflows"; // Was: cloudflare:workers
-import { makeAdapters } from "./adapters/Adapters";
-import type { TestEnv } from "./TestEnv";
+import { WorkflowEntrypoint } from "../workflows.js"; // Was: cloudflare:workers
+import { makeAdapters } from "./adapters/Adapters.js";
+import type { TestEnv } from "./TestEnv.js";
 
 export type CalculateCubeParams = {
   value: number;

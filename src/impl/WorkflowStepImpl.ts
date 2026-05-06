@@ -8,7 +8,7 @@ import type {
   WorkflowTimeoutDuration,
 } from "cloudflare:workers";
 
-import { PauseControl } from "./PauseControl";
+import { PauseControl } from "./PauseControl.js";
 
 export class TerminatedError extends Error {
   constructor() {
