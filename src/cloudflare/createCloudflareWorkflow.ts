@@ -13,11 +13,11 @@ export type WrapStep<Env> = (
   instanceId: string,
   ctx: ExecutionContext,
   env: Env,
-) => WorkflowStep;
+) => Promise<WorkflowStep>;
 
 export function createCloudflareWorkflow<Env, Params extends Rpc.Serializable<Params>>(
   WorkflowEntrypointConstructor: WorkflowEntrypointConstructor<Env, Params>,
-  wrapStep: WrapStep<Env> = (step) => step,
+  wrapStep: WrapStep<Env> = async (step) => step,
 ): CloudflareWorkflowEntrypoint<Env, Params> {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
@@ -32,7 +32,7 @@ export function createCloudflareWorkflow<Env, Params extends Rpc.Serializable<Pa
     override async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
       return this.workflowEntrypoint.run(
         event,
-        wrapStep(step, event.instanceId, this.ctx, this.env),
+        await wrapStep(step, event.instanceId, this.ctx, this.env),
       );
     }
   };
